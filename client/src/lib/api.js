@@ -67,13 +67,13 @@ export const getTransactions = (params) => api.get('/transactions', { params });
 export const createTransaction = (data) => api.post('/transactions', data);
 
 // Categories
-export const getCategories = () => api.get('/categories');
+export const getCategories = () => api.get(`/categories?t=${Date.now()}`);
 export const createCategory = (data) => api.post('/categories', data);
 export const updateCategory = (id, data) => api.put(`/categories/${id}`, data);
 export const deleteCategory = (id) => api.delete(`/categories/${id}`);
 
 // Accounts
-export const getAccounts = () => api.get('/accounts');
+export const getAccounts = () => api.get(`/accounts?t=${Date.now()}`);
 export const createAccount = (data) => api.post('/accounts', data);
 export const updateAccount = (id, data) => api.put(`/accounts/${id}`, data);
 export const deleteAccount = (id) => api.delete(`/accounts/${id}`);

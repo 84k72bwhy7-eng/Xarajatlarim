@@ -40,18 +40,39 @@ export default function ProfilePage() {
 
     const loadData = async () => {
         setLoading(true);
+        console.log('Fetching profile data...');
         try {
             const [pRes, cRes, aRes] = await Promise.all([
                 getProfile(),
                 getCategories(),
                 getAccounts()
             ]);
-            setUser(pRes.data);
-            setProfileForm({ name: pRes.data.name, email: pRes.data.email, avatar: pRes.data.avatar || '' });
-            setCategories(cRes.data);
-            setAccounts(aRes.data);
+
+            console.log('Profile Response:', pRes.data);
+            console.log('Categories Response:', cRes.data);
+            console.log('Accounts Response:', aRes.data);
+
+            if (pRes.data) {
+                setUser(pRes.data);
+                setProfileForm({
+                    name: pRes.data.name,
+                    email: pRes.data.email,
+                    avatar: pRes.data.avatar || ''
+                });
+            }
+
+            if (Array.isArray(cRes.data)) {
+                setCategories(cRes.data);
+            } else {
+                console.error('Categories data is not an array:', cRes.data);
+            }
+
+            if (Array.isArray(aRes.data)) {
+                setAccounts(aRes.data);
+            }
         } catch (err) {
             console.error('Error loading profile data:', err);
+            alert('Ma\'lumotlarni yuklashda xato yuz berdi. Iltimos, sahifani yangilang.');
         } finally {
             setLoading(false);
         }
