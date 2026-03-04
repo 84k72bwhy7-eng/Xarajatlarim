@@ -9,6 +9,7 @@ import budgetRoutes from './routes/budgets.js';
 import dashboardRoutes from './routes/dashboard.js';
 import categoryRoutes from './routes/categories.js';
 import telegramAuthRoutes from './routes/telegramAuth.js';
+import reportRoutes from './routes/reports.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ app.use('/api/accounts', accountRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
