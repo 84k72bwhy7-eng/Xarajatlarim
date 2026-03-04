@@ -83,7 +83,13 @@ export const createBudget = (data) => api.post('/budgets', data);
 
 // Profile
 export const getProfile = () => api.get('/profile');
-export const updateProfile = (data) => api.put('/profile', data);
+export const updateProfile = async (data) => {
+    const response = await api.put('/profile', data);
+    if (response.data) {
+        localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response.data;
+};
 export const updatePassword = (data) => api.put('/profile/password', data);
 
 // Admin
