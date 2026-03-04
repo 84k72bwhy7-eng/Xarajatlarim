@@ -1,6 +1,5 @@
 [build]
 builder = "NIXPACKS"
-watchEdges = ["package.json", "prisma/schema.prisma"]
 buildCommand = "npm run build"
 
 [deploy]
