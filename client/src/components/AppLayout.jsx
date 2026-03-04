@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Leaf, User, Shield } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Leaf, User, Shield, HandCoins, Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logout } from '../lib/api';
 
@@ -21,6 +21,8 @@ export default function AppLayout({ tgUser, user }) {
     const navItems = [
         { to: '/', icon: LayoutDashboard, label: t('nav.dashboard') },
         { to: '/transactions', icon: ReceiptText, label: t('nav.transactions') },
+        { to: '/debts', icon: HandCoins, label: 'Qarzlar' },
+        { to: '/goals', icon: Target, label: 'Maqsadlar' },
         { to: '/budgets', icon: PieChart, label: t('nav.budget') },
     ];
 

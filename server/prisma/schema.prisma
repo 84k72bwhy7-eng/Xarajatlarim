@@ -30,6 +30,8 @@ model User {
   categories            Category[]
   budgets               Budget[]
   recurringTransactions RecurringTransaction[]
+  debts                 Debt[]
+  goals                 Goal[]
 
   @@map("users")
 }
@@ -167,4 +169,49 @@ model RecurringTransaction {
   updatedAt DateTime @updatedAt
 
   @@map("recurring_transactions")
+}
+
+// ===== DEBTS (QARZLAR) =====
+enum DebtType {
+  GIVEN  // Men qarz berdim (menga qaytarishi kerak)
+  TAKEN  // Men qarz oldim (men qaytarishim kerak)
+}
+
+model Debt {
+  id          String    @id @default(cuid())
+  type        DebtType
+  personName  String
+  amount      Float
+  paidAmount  Float     @default(0)
+  description String?
+  dueDate     DateTime?
+  isPaid      Boolean   @default(false)
+  userId      String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("debts")
+}
+
+// ===== GOALS (MAQSADLAR) =====
+model Goal {
+  id           String    @id @default(cuid())
+  name         String
+  targetAmount Float
+  savedAmount  Float     @default(0)
+  icon         String    @default("🎯")
+  color        String    @default("#2d7a55")
+  deadline     DateTime?
+  isCompleted  Boolean   @default(false)
+  userId       String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("goals")
 }

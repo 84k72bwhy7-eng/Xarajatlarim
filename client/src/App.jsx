@@ -7,6 +7,8 @@ import TransactionsPage from './pages/TransactionsPage';
 import BudgetsPage from './pages/BudgetsPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
+import DebtsPage from './pages/DebtsPage';
+import GoalsPage from './pages/GoalsPage';
 import { initializeTelegramApp, tg } from './lib/telegram';
 import { loginWithTelegram } from './lib/api';
 
@@ -65,6 +67,8 @@ function App() {
         >
           <Route index element={<Dashboard tgUser={tgUser} />} />
           <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="debts" element={<DebtsPage />} />
+          <Route path="goals" element={<GoalsPage />} />
           <Route path="budgets" element={<BudgetsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           {user?.role === 'SUPERADMIN' && (

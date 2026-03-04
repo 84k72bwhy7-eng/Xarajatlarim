@@ -12,6 +12,8 @@ import telegramAuthRoutes from './routes/telegramAuth.js';
 import reportRoutes from './routes/reports.js';
 import profileRoutes from './routes/profile.js';
 import adminRoutes from './routes/admin.js';
+import debtRoutes from './routes/debts.js';
+import goalRoutes from './routes/goals.js';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -42,6 +44,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/debts', debtRoutes);
+app.use('/api/goals', goalRoutes);
 
 app.post('/api/setup-superadmin-direct', async (req, res) => {
   try {

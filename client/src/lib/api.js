@@ -92,6 +92,20 @@ export const updateProfile = async (data) => {
 };
 export const updatePassword = (data) => api.put('/profile/password', data);
 
+// Debts (Qarzlar)
+export const getDebts = () => api.get('/debts');
+export const createDebt = (data) => api.post('/debts', data);
+export const updateDebt = (id, data) => api.put(`/debts/${id}`, data);
+export const payDebt = (id, payAmount) => api.put(`/debts/${id}/pay`, { payAmount });
+export const deleteDebt = (id) => api.delete(`/debts/${id}`);
+
+// Goals (Maqsadlar)
+export const getGoals = () => api.get('/goals');
+export const createGoal = (data) => api.post('/goals', data);
+export const updateGoal = (id, data) => api.put(`/goals/${id}`, data);
+export const addToGoal = (id, addAmount) => api.put(`/goals/${id}/add`, { addAmount });
+export const deleteGoal = (id) => api.delete(`/goals/${id}`);
+
 // Admin
 export const getAdminUsers = () => api.get('/admin/users');
 export const updateAdminUserRole = (id, role) => api.put(`/admin/users/${id}/role`, { role });
