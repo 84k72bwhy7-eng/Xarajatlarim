@@ -11,7 +11,7 @@
         "logout": "Chiqish"
     },
     "dashboard": {
-        "welcome": "Xush kelibsiz, {{name}}!",
+        "welcome": "Xush kelibsiz{{name, ', '}}!",
         "netWorth": "Jami balans",
         "safeToSpend": "Kunlik xavfsiz sarf",
         "monthlyIncome": "Oylik daromad",
@@ -20,7 +20,7 @@
         "viewAll": "Barchasini ko'rish",
         "noTransactions": "Tranzaksiyalar yo'q",
         "expensesByCategory": "Kategoriyalar bo'yicha xarajatlar",
-        "sixMonthsCashflow": "So'nggi 6 oylik keshflou"
+        "sixMonthsCashflow": "So'nggi 6 oy (Keshflou)"
     },
     "transactions": {
         "title": "Tranzaksiyalar",
@@ -31,7 +31,7 @@
         "account": "Hisob",
         "targetAccount": "Qabul qiluvchi hisob",
         "date": "Sana",
-        "description": "Izoh (ixtiyoriy)",
+        "description": "Izoh",
         "save": "Saqlash",
         "cancel": "Bekor qilish",
         "income": "Daromad",
@@ -62,8 +62,8 @@
         "name": "Ism",
         "loginBtn": "Kirish",
         "registerBtn": "Ro'yxatdan o'tish",
-        "noAccount": "Akkauntingiz yo'qmi?",
-        "hasAccount": "Akkauntingiz bormi?",
-        "tgLogin": "Telegram orqali kirish"
+        "noAccount": "Akkauntingiz yo'qmi? Ro'yxatdan o'ting",
+        "hasAccount": "Akkauntingiz bormi? Kirish",
+        "tgLogin": "Telegram Mini App orqali kirsangiz, bu jarayon avtomatik bajariladi"
     }
 }

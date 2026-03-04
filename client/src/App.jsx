@@ -3,12 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import AppLayout from './components/AppLayout';
 import AuthPage from './pages/AuthPage';
+import TransactionsPage from './pages/TransactionsPage';
+import BudgetsPage from './pages/BudgetsPage';
 import { initializeTelegramApp, tg } from './lib/telegram';
 import { loginWithTelegram } from './lib/api';
-
-// Vaqtincha stub komponentlar (keyingi qadamda yaratamiz)
-const TransactionsPage = () => <div className="p-4 bg-white rounded-2xl shadow-sm"><h2 className="text-xl font-bold">Xarajatlar ro'yxati</h2></div>;
-const BudgetsPage = () => <div className="p-4 bg-white rounded-2xl shadow-sm"><h2 className="text-xl font-bold">Byudjetlar</h2></div>;
 
 function ProtectedRoute({ children, isAuthenticated }) {
   if (!isAuthenticated) return <Navigate to="/login" replace />;

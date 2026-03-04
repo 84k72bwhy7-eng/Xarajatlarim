@@ -11,7 +11,7 @@
         "logout": "Выйти"
     },
     "dashboard": {
-        "welcome": "Добро пожаловать, {{name}}!",
+        "welcome": "Добро пожаловать{{name, ', '}}!",
         "netWorth": "Общий баланс",
         "safeToSpend": "Безопасный расход в день",
         "monthlyIncome": "Доход за месяц",
@@ -31,7 +31,7 @@
         "account": "Счет",
         "targetAccount": "Счет зачисления",
         "date": "Дата",
-        "description": "Описание (необязательно)",
+        "description": "Описание",
         "save": "Сохранить",
         "cancel": "Отмена",
         "income": "Доход",
@@ -62,8 +62,8 @@
         "name": "Имя",
         "loginBtn": "Войти",
         "registerBtn": "Зарегистрироваться",
-        "noAccount": "Нет аккаунта?",
-        "hasAccount": "Уже есть аккаунт?",
-        "tgLogin": "Войти через Telegram"
+        "noAccount": "Нет аккаунта? Зарегистрируйтесь",
+        "hasAccount": "Уже есть аккаунт? Войти",
+        "tgLogin": "При входе через Telegram Mini App этот процесс выполняется автоматически"
     }
 }
