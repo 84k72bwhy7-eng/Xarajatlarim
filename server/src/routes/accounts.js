@@ -1,6 +1,6 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const auth = require('../middleware/auth');
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import auth from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -62,5 +62,4 @@ router.delete('/:id', async (req, res) => {
         res.status(500).json({ error: "Hisobni o'chirishda xato" });
     }
 });
-
-module.exports = router;
+export default router;

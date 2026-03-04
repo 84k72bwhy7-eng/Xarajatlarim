@@ -1,7 +1,7 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const auth = require('../middleware/auth');
-const { autoCategorize } = require('../services/categorizer');
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import auth from '../middleware/auth.js';
+import { autoCategorize } from '../services/categorizer.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -188,4 +188,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

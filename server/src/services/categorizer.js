@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 /**
@@ -82,4 +82,4 @@ async function autoCategorize(userId, description, transactionType) {
     return null;
 }
 
-module.exports = { autoCategorize };
+export { autoCategorize };

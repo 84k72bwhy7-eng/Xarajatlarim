@@ -1,14 +1,14 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
 
-const authRoutes = require('./routes/auth');
-const transactionRoutes = require('./routes/transactions');
-const accountRoutes = require('./routes/accounts');
-const budgetRoutes = require('./routes/budgets');
-const dashboardRoutes = require('./routes/dashboard');
-const categoryRoutes = require('./routes/categories');
-const telegramAuthRoutes = require('./routes/telegramAuth');
+import authRoutes from './routes/auth.js';
+import transactionRoutes from './routes/transactions.js';
+import accountRoutes from './routes/accounts.js';
+import budgetRoutes from './routes/budgets.js';
+import dashboardRoutes from './routes/dashboard.js';
+import categoryRoutes from './routes/categories.js';
+import telegramAuthRoutes from './routes/telegramAuth.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,5 +48,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-module.exports = app;
+export default app;

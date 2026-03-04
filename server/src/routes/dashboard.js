@@ -1,7 +1,7 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const auth = require('../middleware/auth');
-const { calculateSafeToSpend } = require('../services/calculator');
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import auth from '../middleware/auth.js';
+import { calculateSafeToSpend } from '../services/calculator.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -116,5 +116,4 @@ router.get('/summary', async (req, res) => {
         res.status(500).json({ error: 'Dashboard ma\'lumotlarni olishda xato' });
     }
 });
-
-module.exports = router;
+export default router;
