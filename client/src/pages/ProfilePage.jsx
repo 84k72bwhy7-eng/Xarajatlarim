@@ -491,8 +491,8 @@ export default function ProfilePage() {
                                             onClick={() => setCategoryForm(c => ({ ...c, type }))}
                                             className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 border-2 ${categoryForm.type === type
                                                 ? type === 'EXPENSE'
-                                                    ? 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-100'
-                                                    : 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100'
+                                                    ? 'bg-[#a06040] border-[#a06040] text-white shadow-lg shadow-[#7d4e31]/20'
+                                                    : 'bg-[#2d7a55] border-[#2d7a55] text-white shadow-lg shadow-[#1a4d3a]/20'
                                                 : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
@@ -505,13 +505,15 @@ export default function ProfilePage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsCategoryModalOpen(false)}
-                                    className="flex-1 py-3 px-4 rounded-xl text-slate-500 font-bold bg-slate-100 hover:bg-slate-200 transition-colors"
+                                    className="flex-1 py-3 px-4 rounded-xl font-bold transition-colors"
+                                    style={{ color: '#7d4e31', backgroundColor: '#f0faf5', border: '1px solid #dff2ea' }}
                                 >
                                     Bekor qilish
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-[1.5] py-3 px-6 bg-forest-700 text-white rounded-xl font-bold shadow-lg shadow-forest-100 hover:bg-forest-800 transition-all active:scale-95"
+                                    className="flex-[1.5] py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95"
+                                    style={{ background: 'linear-gradient(135deg, #1a4d3a, #2d7a55)', boxShadow: '0 4px 12px rgba(26,77,58,0.3)' }}
                                 >
                                     Saqlash
                                 </button>
