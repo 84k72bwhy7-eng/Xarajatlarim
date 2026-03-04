@@ -80,6 +80,10 @@ app.post('/api/setup-superadmin-direct', async (req, res) => {
   }
 });
 
+app.get('/api/test-deploy', (req, res) => {
+  res.json({ message: 'Deploy is working!', time: new Date().toISOString() });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
