@@ -3,9 +3,10 @@ import { Plus, Search, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getTransactions } from '../lib/api';
 import AddTransactionModal from '../components/AddTransactionModal';
+import { getCategoryName } from '../lib/categoryTranslations';
 
 export default function TransactionsPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState('ALL');
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -62,8 +63,8 @@ export default function TransactionsPage() {
                         <button
                             key={val}
                             className={`flex-1 py-2 rounded-lg transition ${activeTab === val
-                                    ? val === 'EXPENSE' ? 'bg-rose-50 text-rose-700' : val === 'INCOME' ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-50 text-indigo-700'
-                                    : 'text-slate-500 hover:bg-slate-50'
+                                ? val === 'EXPENSE' ? 'bg-rose-50 text-rose-700' : val === 'INCOME' ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-50 text-indigo-700'
+                                : 'text-slate-500 hover:bg-slate-50'
                                 }`}
                             onClick={() => setActiveTab(val)}
                         >
@@ -114,7 +115,7 @@ export default function TransactionsPage() {
                                                 {tx.category && (
                                                     <>
                                                         <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tx.category.color }}></span>
-                                                        {tx.category.name}
+                                                        {getCategoryName(tx.category.name, i18n.language)}
                                                     </>
                                                 )}
                                             </p>

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { createTransaction, getCategories, getAccounts } from '../lib/api';
+import { getCategoryName } from '../lib/categoryTranslations';
 
 export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
     const [accounts, setAccounts] = useState([]);
@@ -99,8 +100,8 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                                     type="button"
                                     onClick={() => setForm(p => ({ ...p, type: opt.value }))}
                                     className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${form.type === opt.value
-                                            ? `bg-gradient-to-r ${opt.color} text-white shadow-md`
-                                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                        ? `bg-gradient-to-r ${opt.color} text-white shadow-md`
+                                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                         }`}
                                 >
                                     {opt.label}
@@ -140,7 +141,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                             >
                                 <option value="">{t('transactions.category')}...</option>
                                 {categories.map(cat => (
-                                    <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                                    <option key={cat.id} value={cat.id}>{cat.icon} {getCategoryName(cat.name, i18n.language)}</option>
                                 ))}
                             </select>
                         </div>
