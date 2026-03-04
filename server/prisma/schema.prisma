@@ -9,13 +9,14 @@ datasource db {
 
 // ===== USERS =====
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  currency  String   @default("UZS")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  name       String
+  telegramId String?  @unique
+  currency   String   @default("UZS")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   accounts              Account[]
   transactions          Transaction[]
@@ -62,6 +63,7 @@ enum CategoryType {
 model Category {
   id       String       @id @default(cuid())
   name     String
+  nameRu   String?
   icon     String       @default("📦")
   color    String       @default("#8b5cf6")
   type     CategoryType @default(EXPENSE)
