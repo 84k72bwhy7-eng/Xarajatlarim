@@ -341,7 +341,7 @@ export default function ProfilePage() {
                             }}
                             className="p-2 bg-earth-600 text-white rounded-xl shadow-lg hover:bg-earth-700 transition-all hover:scale-110 active:scale-95"
                         >
-                            <Plus size={20} />
+                            <Plus size={20} strokeWidth={3} />
                         </button>
                     </div>
                     {accounts.length === 0 ? (
