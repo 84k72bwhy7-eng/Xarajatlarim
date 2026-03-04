@@ -24,9 +24,9 @@ dp.include_router(settings_router)
 
 def get_webapp_keyboard():
     from aiogram.utils.keyboard import ReplyKeyboardBuilder
+    from aiogram.types import WebAppInfo
     builder = ReplyKeyboardBuilder()
-    # Eslatma: Bu Vercel yoki Railway deploydan so'ng o'zgartiriladi
-    WEBAPP_URL = "https://xarajatlarim.vercel.app" 
+    WEBAPP_URL = "https://frontend-production-a930.up.railway.app" 
     builder.button(text="📱 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
     builder.button(text="➕ Xarajat qo'shish")
     builder.button(text="📊 Hisobot")
