@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, WebAppInfo
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -36,13 +36,15 @@ def get_category_keyboard(categories):
 def get_main_keyboard():
     """Asosiy klaviatura"""
     builder = ReplyKeyboardBuilder()
+    WEBAPP_URL = "https://frontend-production-a930.up.railway.app" 
+    builder.button(text="📱 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
     builder.button(text="➕ Xarajat qo'shish")
     builder.button(text="📊 Hisobot")
     builder.button(text="📅 Bugungi xarajatlar")
     builder.button(text="📈 Oylik hisobot")
     builder.button(text="💰 Byudjet")
     builder.button(text="⚙️ Sozlamalar")
-    builder.adjust(2, 2, 2)
+    builder.adjust(1, 2, 2, 2)
     return builder.as_markup(resize_keyboard=True)
 
 
