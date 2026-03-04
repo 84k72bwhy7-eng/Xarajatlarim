@@ -8,6 +8,7 @@ const accountRoutes = require('./routes/accounts');
 const budgetRoutes = require('./routes/budgets');
 const dashboardRoutes = require('./routes/dashboard');
 const categoryRoutes = require('./routes/categories');
+const telegramAuthRoutes = require('./routes/telegramAuth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth/twa', telegramAuthRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/budgets', budgetRoutes);

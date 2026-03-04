@@ -1,12 +1,12 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, BotCommand
+from aiogram.types import Message, BotCommand, WebAppInfo
 from aiogram.filters import CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
 import database as db
-from handlers.expense import router as expense_router, get_main_keyboard
+from handlers.expense import router as expense_router
 from handlers.settings import router as settings_router
 
 logging.basicConfig(
@@ -22,6 +22,17 @@ dp = Dispatcher(storage=MemoryStorage())
 dp.include_router(expense_router)
 dp.include_router(settings_router)
 
+def get_webapp_keyboard():
+    from aiogram.utils.keyboard import ReplyKeyboardBuilder
+    builder = ReplyKeyboardBuilder()
+    # Eslatma: Bu Vercel yoki Railway deploydan so'ng o'zgartiriladi
+    WEBAPP_URL = "https://xarajatlarim.vercel.app" 
+    builder.button(text="📱 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
+    builder.button(text="➕ Xarajat qo'shish")
+    builder.button(text="📊 Hisobot")
+    builder.button(text="⚙️ Sozlamalar")
+    builder.adjust(1, 2, 1)
+    return builder.as_markup(resize_keyboard=True)
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
@@ -40,13 +51,13 @@ async def start_handler(message: Message):
         "✅ Kategoriyalashga\n"
         "✅ Statistika ko'rishga\n"
         "✅ Byudjet belgilashga yordam beradi!\n\n"
-        "Quyidagi tugmalardan foydalaning:"
+        "👆 Yuqoridagi **Ilovani ochish** tugmasi orqali to'liq panelga kiring!"
     )
 
     await message.answer(
         welcome_text,
         parse_mode="HTML",
-        reply_markup=get_main_keyboard()
+        reply_markup=get_webapp_keyboard()
     )
 
 
