@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Leaf } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logout } from '../lib/api';
 
@@ -25,69 +25,94 @@ export default function AppLayout({ tgUser }) {
     ];
 
     return (
-        <div className="min-h-screen pb-20 sm:pb-0" style={{ backgroundColor: 'var(--tg-theme-bg-color, #f8fafc)' }}>
-            {/* Navbar (Top) */}
-            <nav className="border-b px-4 py-3 flex items-center justify-between sticky top-0 z-30"
-                style={{ backgroundColor: 'var(--tg-theme-bg-color, #ffffff)', borderColor: 'var(--tg-theme-hint-color, #e2e8f0)' }}>
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-                        PF
+        <div className="min-h-screen pb-20 sm:pb-0" style={{ backgroundColor: '#f0f5f2' }}>
+            {/* Top Navbar */}
+            <nav className="sticky top-0 z-30 px-4 py-3 flex items-center justify-between"
+                style={{ backgroundColor: '#1a4d3a', boxShadow: '0 2px 12px rgba(26, 77, 58, 0.4)' }}>
+                {/* Logo */}
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                        <Leaf size={18} className="text-white" />
                     </div>
-                    <span className="text-lg font-bold" style={{ color: 'var(--tg-theme-text-color, #0f172a)' }}>
+                    <span className="text-lg font-bold text-white tracking-tight">
                         {t('app.title')}
                     </span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button onClick={toggleLanguage} className="flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 border border-slate-200" title={t('settings.language')}>
-                        <Globe size={16} />
+
+                {/* Right controls */}
+                <div className="flex items-center gap-2">
+                    {/* Language toggle */}
+                    <button
+                        onClick={toggleLanguage}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 border border-white/20 transition"
+                    >
+                        <Globe size={13} />
                         {i18n.language.toUpperCase()}
                     </button>
+
+                    {/* User name */}
                     {tgUser && (
-                        <span className="text-sm font-medium hidden sm:block" style={{ color: 'var(--tg-theme-hint-color, #64748b)' }}>
+                        <span className="text-sm font-medium text-white/70 hidden sm:block">
                             {tgUser.first_name}
                         </span>
                     )}
-                    <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center font-medium overflow-hidden border border-slate-200 cursor-pointer">
+
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center font-bold text-sm"
+                        style={{ backgroundColor: '#2d7a55', color: '#dff2ea' }}>
                         {tgUser?.photo_url ? (
                             <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-slate-500 text-sm">{tgUser?.first_name?.charAt(0) || 'U'}</span>
+                            <span>{tgUser?.first_name?.charAt(0) || 'U'}</span>
                         )}
                     </div>
+
+                    {/* Logout (only non-TG) */}
                     {!tgUser && (
-                        <button onClick={handleLogout} className="text-slate-500 hover:text-rose-500">
-                            <LogOut size={20} />
+                        <button onClick={handleLogout} className="text-white/60 hover:text-red-300 transition ml-1">
+                            <LogOut size={18} />
                         </button>
                     )}
                 </div>
             </nav>
 
-            {/* Main Content Area */}
+            {/* Decorative top border stripe */}
+            <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #7d4e31, #2d7a55, #f5e6d0, #2d7a55, #7d4e31)' }} />
+
+            {/* Main Content */}
             <main className="max-w-4xl mx-auto py-6 px-4">
                 <Outlet />
             </main>
 
-            {/* Bottom Navigation for Mobile */}
-            <div className="fixed bottom-0 left-0 right-0 border-t bg-white sm:hidden z-40 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
-                style={{ backgroundColor: 'var(--tg-theme-bg-color, #ffffff)', borderColor: 'var(--tg-theme-hint-color, #e2e8f0)' }}>
+            {/* Bottom Navigation (Mobile) */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden"
+                style={{ backgroundColor: '#1a4d3a', boxShadow: '0 -2px 20px rgba(26,77,58,0.5)' }}>
                 <div className="flex justify-around items-center h-16">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}
+                            end={item.to === '/'}
                             className={({ isActive }) =>
-                                `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
+                                `flex flex-col items-center justify-center w-full h-full gap-1 transition-all ${isActive
+                                    ? 'text-white'
+                                    : 'text-white/40 hover:text-white/70'
                                 }`
                             }
-                            style={({ isActive }) => ({ color: isActive ? 'var(--tg-theme-button-color, #4f46e5)' : 'var(--tg-theme-hint-color, #94a3b8)' })}
                         >
-                            <item.icon size={22} />
-                            <span className="text-[10px] font-medium">{item.label}</span>
+                            {({ isActive }) => (
+                                <>
+                                    <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-white/15' : ''}`}>
+                                        <item.icon size={20} />
+                                    </div>
+                                    <span className="text-[10px] font-medium">{item.label}</span>
+                                </>
+                            )}
                         </NavLink>
                     ))}
                 </div>
             </div>
-
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Search, Loader2, Leaf } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getTransactions } from '../lib/api';
 import AddTransactionModal from '../components/AddTransactionModal';
@@ -17,7 +17,6 @@ export default function TransactionsPage() {
         setLoading(true);
         try {
             const res = await getTransactions();
-            // Backend { transactions: [...], pagination: {} formatida qaytaradi
             setTransactions(res.data?.transactions || res.data || []);
         } catch (err) {
             console.error('Transactions fetch error:', err);
@@ -27,9 +26,7 @@ export default function TransactionsPage() {
         }
     };
 
-    useEffect(() => {
-        fetchTransactions();
-    }, []);
+    useEffect(() => { fetchTransactions(); }, []);
 
     const filtered = transactions.filter(tx => {
         const matchesTab = activeTab === 'ALL' || tx.type === activeTab;
@@ -39,20 +36,24 @@ export default function TransactionsPage() {
         return matchesTab && matchesSearch;
     });
 
+    const tabs = [
+        { val: 'ALL', label: 'Barchasi' },
+        { val: 'EXPENSE', label: t('transactions.expense') },
+        { val: 'INCOME', label: t('transactions.income') },
+    ];
+
     return (
         <>
-            <AddTransactionModal
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                onSuccess={fetchTransactions}
-            />
+            <AddTransactionModal isOpen={showModal} onClose={() => setShowModal(false)} onSuccess={fetchTransactions} />
 
-            <div className="space-y-6 animate-in fade-in duration-500">
-                <div className="flex justify-between items-center mb-2">
-                    <h1 className="text-2xl font-bold text-slate-900">{t('transactions.title')}</h1>
+            <div className="space-y-5 animate-in fade-in duration-500">
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold" style={{ color: '#1a4d3a' }}>{t('transactions.title')}</h1>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-indigo-600 text-white rounded-xl px-4 py-2.5 shadow-sm hover:bg-indigo-700 flex items-center gap-2 text-sm font-medium"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white transition hover:opacity-90 active:scale-95"
+                        style={{ background: 'linear-gradient(135deg, #1a4d3a, #2d7a55)', boxShadow: '0 4px 12px rgba(26,77,58,0.3)' }}
                     >
                         <Plus size={18} />
                         {t('transactions.addTransaction')}
@@ -60,74 +61,79 @@ export default function TransactionsPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex text-sm font-medium">
-                    {[['ALL', 'Barchasi'], ['EXPENSE', t('transactions.expense')], ['INCOME', t('transactions.income')]].map(([val, label]) => (
+                <div className="rounded-2xl p-1 flex"
+                    style={{ backgroundColor: '#ffffff', boxShadow: '0 2px 8px rgba(26,77,58,0.06)' }}>
+                    {tabs.map(tab => (
                         <button
-                            key={val}
-                            className={`flex-1 py-2 rounded-lg transition ${activeTab === val
-                                ? val === 'EXPENSE' ? 'bg-rose-50 text-rose-700' : val === 'INCOME' ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-50 text-indigo-700'
-                                : 'text-slate-500 hover:bg-slate-50'
-                                }`}
-                            onClick={() => setActiveTab(val)}
+                            key={tab.val}
+                            onClick={() => setActiveTab(tab.val)}
+                            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                            style={activeTab === tab.val
+                                ? { background: 'linear-gradient(135deg, #1a4d3a, #2d7a55)', color: 'white', boxShadow: '0 2px 8px rgba(26,77,58,0.25)' }
+                                : { color: '#7d4e31' }
+                            }
                         >
-                            {label}
+                            {tab.label}
                         </button>
                     ))}
                 </div>
 
-                {/* Search */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="p-4 border-b border-slate-100 flex gap-3">
-                        <div className="relative flex-1">
-                            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                {/* Search + List */}
+                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
+                    <div className="p-4 border-b" style={{ borderColor: '#f0faf5' }}>
+                        <div className="relative">
+                            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#a06040' }} />
                             <input
                                 type="text"
                                 placeholder={`${t('transactions.description')}...`}
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-50 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-100"
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none"
+                                style={{ backgroundColor: '#f0faf5', color: '#1a4d3a', border: '1px solid #e0f0e8' }}
                             />
                         </div>
                     </div>
 
-                    {/* List */}
                     {loading ? (
-                        <div className="py-16 flex items-center justify-center">
-                            <Loader2 size={32} className="animate-spin text-indigo-400" />
+                        <div className="py-14 flex items-center justify-center">
+                            <Loader2 size={28} className="animate-spin" style={{ color: '#2d7a55' }} />
                         </div>
                     ) : filtered.length === 0 ? (
-                        <div className="py-16 text-center text-slate-400">
-                            <p>{t('dashboard.noTransactions')}</p>
-                            <button onClick={() => setShowModal(true)} className="mt-4 text-indigo-600 font-medium hover:underline text-sm">
+                        <div className="py-14 text-center">
+                            <Leaf size={36} className="mx-auto mb-3 opacity-20" style={{ color: '#1a4d3a' }} />
+                            <p className="text-sm" style={{ color: '#7d4e31' }}>{t('dashboard.noTransactions')}</p>
+                            <button onClick={() => setShowModal(true)} className="mt-3 text-sm font-semibold hover:opacity-70 transition" style={{ color: '#2d7a55' }}>
                                 + {t('transactions.addTransaction')}
                             </button>
                         </div>
                     ) : (
-                        <div className="divide-y divide-slate-100">
+                        <div className="divide-y" style={{ borderColor: '#f0faf5' }}>
                             {filtered.map((tx) => (
-                                <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition">
+                                <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-[#f7fcf9] transition">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                                            style={{ backgroundColor: `${tx.category?.color || '#6366f1'}20` }}>
+                                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
+                                            style={{ backgroundColor: `${tx.category?.color || '#2d7a55'}15` }}>
                                             {tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸')}
                                         </div>
                                         <div>
-                                            <p className="font-medium text-slate-900">{tx.description || tx.category?.name || '-'}</p>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1">
-                                                {tx.category && (
-                                                    <>
-                                                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tx.category.color }}></span>
-                                                        {getCategoryName(tx.category.name, i18n.language)}
-                                                    </>
-                                                )}
+                                            <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>
+                                                {tx.description || tx.category?.name || '-'}
                                             </p>
+                                            {tx.category && (
+                                                <p className="text-xs flex items-center gap-1.5 mt-0.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: tx.category.color }}></span>
+                                                    <span style={{ color: '#a06040' }}>{getCategoryName(tx.category.name, i18n.language)}</span>
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className={`font-bold ${tx.type === 'INCOME' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                                        <p className="text-sm font-bold" style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
                                             {tx.type === 'INCOME' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
                                         </p>
-                                        <p className="text-xs text-slate-400">{new Date(tx.date).toLocaleDateString()}</p>
+                                        <p className="text-xs mt-0.5" style={{ color: '#a06040' }}>
+                                            {new Date(tx.date).toLocaleDateString()}
+                                        </p>
                                     </div>
                                 </div>
                             ))}

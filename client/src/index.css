@@ -1,7 +1,118 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    /* Nature theme — Forest & Earth palette */
+    --color-forest-900: #0d2b1e;
+    --color-forest-800: #1a4d3a;
+    --color-forest-700: #1e6142;
+    --color-forest-600: #2d7a55;
+    --color-forest-500: #3a9669;
+    --color-forest-400: #52b082;
+    --color-forest-300: #7ecba4;
+    --color-forest-200: #b4e0c8;
+    --color-forest-100: #dff2ea;
+    --color-forest-50: #f0faf5;
+
+    --color-earth-900: #3b1a0a;
+    --color-earth-800: #5c2c12;
+    --color-earth-700: #7d4e31;
+    --color-earth-600: #a06040;
+    --color-earth-500: #bf7c55;
+    --color-earth-400: #d4987a;
+    --color-earth-300: #e4b89a;
+    --color-earth-200: #f0d4bc;
+    --color-earth-100: #f8ece0;
+    --color-earth-50: #fdf6f0;
+
+    --color-sand-100: #f5e6d0;
+    --color-sand-200: #e8d5b7;
+    --color-sand-300: #d4bb96;
+  }
+
+  html {
+    font-family: 'Geologica', system-ui, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    font-family: 'Geologica', system-ui, sans-serif;
+    background-color: #f0f5f2;
+    color: #1a4d3a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    font-family: 'Geologica', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+
+  /* Nature gradient backgrounds */
+  .bg-nature-gradient {
+    background: linear-gradient(135deg, #1a4d3a 0%, #2d7a55 50%, #1e6142 100%);
+  }
+
+  .bg-earth-gradient {
+    background: linear-gradient(135deg, #7d4e31 0%, #a0522d 100%);
+  }
+
+  .bg-sand-gradient {
+    background: linear-gradient(135deg, #f5e6d0 0%, #e8d5b7 100%);
+  }
+
+  /* Card styles */
+  .card-forest {
+    background: linear-gradient(135deg, #1a4d3a 0%, #1e6142 100%);
+    color: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(26, 77, 58, 0.3);
+  }
+
+  .card-earth {
+    background: linear-gradient(135deg, #7d4e31 0%, #a0522d 100%);
+    color: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(125, 78, 49, 0.3);
+  }
+
+  .card-sand {
+    background: linear-gradient(135deg, #f5e6d0 0%, #e8d5b7 100%);
+    color: #3b1a0a;
+    border-radius: 20px;
+  }
+
+  /* Leaf decoration blur blobs */
+  .nature-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    opacity: 0.15;
+  }
+
+  /* Text shadow for overlaid text */
+  .text-shadow {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f0f5f2;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2d7a55;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #1a4d3a;
   }
 }
