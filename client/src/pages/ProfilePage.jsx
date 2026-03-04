@@ -41,17 +41,12 @@ export default function ProfilePage() {
     const loadData = async () => {
         setLoading(true);
         console.log('Fetching profile data...');
+
+        // Har bir API call alohida try/catch — bitta xato boshqalarni to'xtatmasin
+        // Profile
         try {
-            const [pRes, cRes, aRes] = await Promise.all([
-                getProfile(),
-                getCategories(),
-                getAccounts()
-            ]);
-
+            const pRes = await getProfile();
             console.log('Profile Response:', pRes.data);
-            console.log('Categories Response:', cRes.data);
-            console.log('Accounts Response:', aRes.data);
-
             if (pRes.data) {
                 setUser(pRes.data);
                 setProfileForm({
@@ -60,22 +55,45 @@ export default function ProfilePage() {
                     avatar: pRes.data.avatar || ''
                 });
             }
+        } catch (err) {
+            console.error('Error loading profile:', err);
+            // Fallback: localStorage dan user ma'lumotlarini olish
+            try {
+                const savedUser = JSON.parse(localStorage.getItem('user'));
+                if (savedUser) {
+                    setUser(savedUser);
+                    setProfileForm({
+                        name: savedUser.name || '',
+                        email: savedUser.email || '',
+                        avatar: savedUser.avatar || ''
+                    });
+                }
+            } catch (e) { /* ignore */ }
+        }
 
+        // Categories
+        try {
+            const cRes = await getCategories();
+            console.log('Categories Response:', cRes.data);
             if (Array.isArray(cRes.data)) {
                 setCategories(cRes.data);
-            } else {
-                console.error('Categories data is not an array:', cRes.data);
             }
+        } catch (err) {
+            console.error('Error loading categories:', err);
+        }
 
+        // Accounts
+        try {
+            const aRes = await getAccounts();
+            console.log('Accounts Response:', aRes.data);
             if (Array.isArray(aRes.data)) {
                 setAccounts(aRes.data);
             }
         } catch (err) {
-            console.error('Error loading profile data:', err);
-            alert('Ma\'lumotlarni yuklashda xato yuz berdi. Iltimos, sahifani yangilang.');
-        } finally {
-            setLoading(false);
+            console.error('Error loading accounts:', err);
         }
+
+        setLoading(false);
     };
 
     const handleProfileUpdate = async (e) => {
