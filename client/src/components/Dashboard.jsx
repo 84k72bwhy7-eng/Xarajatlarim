@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Wallet, TrendingUp, TrendingDown,
     ArrowUpRight, ArrowDownRight, CreditCard, Activity
@@ -30,6 +31,7 @@ const StatCard = ({ title, amount, trend, icon: Icon, isPositive, colorClass }) 
 );
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     // Mock data representing the API response from our Express server
     const [data, setData] = useState(null);
 
@@ -90,8 +92,8 @@ export default function Dashboard() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
-                    <p className="text-slate-500 mt-1">Welcome back. Here's your financial summary for {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}.</p>
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{t('nav.dashboard')}</h1>
+                    <p className="text-slate-500 mt-1">{t('dashboard.welcome', { name: '' })}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition shadow-sm">
@@ -107,7 +109,7 @@ export default function Dashboard() {
             {/* Primary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
-                    title="Total Net Worth"
+                    title={t('dashboard.netWorth')}
                     amount={data.netWorth}
                     trend={2.4}
                     isPositive={true}
@@ -115,7 +117,7 @@ export default function Dashboard() {
                     colorClass="bg-indigo-50 text-indigo-600"
                 />
                 <StatCard
-                    title="Monthly Income"
+                    title={t('dashboard.monthlyIncome')}
                     amount={data.monthly.income}
                     trend={3.1}
                     isPositive={true}
@@ -123,7 +125,7 @@ export default function Dashboard() {
                     colorClass="bg-emerald-50 text-emerald-600"
                 />
                 <StatCard
-                    title="Monthly Expenses"
+                    title={t('dashboard.monthlyExpense')}
                     amount={data.monthly.expense}
                     trend={-1.5}
                     isPositive={true} // Decreasing expenses is positive
@@ -131,7 +133,7 @@ export default function Dashboard() {
                     colorClass="bg-red-50 text-red-600"
                 />
                 <StatCard
-                    title="Monthly Savings"
+                    title="Balans / Savdo"
                     amount={data.monthly.balance}
                     trend={12.5}
                     isPositive={true}
@@ -152,9 +154,9 @@ export default function Dashboard() {
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                                 <span className="w-2 h-6 bg-slate-800 rounded-full inline-block"></span>
-                                Recent Transactions
+                                {t('dashboard.recentTransactions')}
                             </h3>
-                            <button className="text-indigo-600 font-medium text-sm hover:underline">View All</button>
+                            <button className="text-indigo-600 font-medium text-sm hover:underline">{t('dashboard.viewAll')}</button>
                         </div>
 
                         <div className="overflow-x-auto">

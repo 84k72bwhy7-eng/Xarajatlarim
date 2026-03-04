@@ -1,0 +1,69 @@
+{
+    "app": {
+        "title": "Xarajatlarim",
+        "loading": "Yuklanmoqda..."
+    },
+    "nav": {
+        "dashboard": "Bosh panel",
+        "transactions": "Tranzaksiyalar",
+        "budget": "Byudjetlar",
+        "settings": "Sozlamalar",
+        "logout": "Chiqish"
+    },
+    "dashboard": {
+        "welcome": "Xush kelibsiz, {{name}}!",
+        "netWorth": "Jami balans",
+        "safeToSpend": "Kunlik xavfsiz sarf",
+        "monthlyIncome": "Oylik daromad",
+        "monthlyExpense": "Oylik xarajat",
+        "recentTransactions": "So'nggi tranzaksiyalar",
+        "viewAll": "Barchasini ko'rish",
+        "noTransactions": "Tranzaksiyalar yo'q",
+        "expensesByCategory": "Kategoriyalar bo'yicha xarajatlar",
+        "sixMonthsCashflow": "So'nggi 6 oylik keshflou"
+    },
+    "transactions": {
+        "title": "Tranzaksiyalar",
+        "addTransaction": "Tranzaksiya qo'shish",
+        "type": "Turi",
+        "amount": "Summa",
+        "category": "Kategoriya",
+        "account": "Hisob",
+        "targetAccount": "Qabul qiluvchi hisob",
+        "date": "Sana",
+        "description": "Izoh (ixtiyoriy)",
+        "save": "Saqlash",
+        "cancel": "Bekor qilish",
+        "income": "Daromad",
+        "expense": "Xarajat",
+        "transfer": "O'tkazma",
+        "deleteConfirm": "O'chirishni tasdiqlaysizmi?"
+    },
+    "budget": {
+        "title": "Byudjetlar",
+        "addBudget": "Byudjet qo'shish",
+        "remaining": "Qoldiq",
+        "spent": "Sarflangan",
+        "of": "dan",
+        "limit": "Limit",
+        "noBudgets": "Bu oy uchun byudjet belgilanmagan"
+    },
+    "settings": {
+        "title": "Sozlamalar",
+        "language": "Til",
+        "categories": "Kategoriyalar",
+        "accounts": "Hisoblar"
+    },
+    "auth": {
+        "loginTitle": "Tizimga kirish",
+        "registerTitle": "Ro'yxatdan o'tish",
+        "email": "Email",
+        "password": "Parol",
+        "name": "Ism",
+        "loginBtn": "Kirish",
+        "registerBtn": "Ro'yxatdan o'tish",
+        "noAccount": "Akkauntingiz yo'qmi?",
+        "hasAccount": "Akkauntingiz bormi?",
+        "tgLogin": "Telegram orqali kirish"
+    }
+}

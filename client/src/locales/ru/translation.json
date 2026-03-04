@@ -1,0 +1,69 @@
+{
+    "app": {
+        "title": "Мои Расходы",
+        "loading": "Загрузка..."
+    },
+    "nav": {
+        "dashboard": "Главная",
+        "transactions": "Транзакции",
+        "budget": "Бюджеты",
+        "settings": "Настройки",
+        "logout": "Выйти"
+    },
+    "dashboard": {
+        "welcome": "Добро пожаловать, {{name}}!",
+        "netWorth": "Общий баланс",
+        "safeToSpend": "Безопасный расход в день",
+        "monthlyIncome": "Доход за месяц",
+        "monthlyExpense": "Расход за месяц",
+        "recentTransactions": "Последние транзакции",
+        "viewAll": "Посмотреть все",
+        "noTransactions": "Нет транзакций",
+        "expensesByCategory": "Расходы по категориям",
+        "sixMonthsCashflow": "Денежный поток (6 мес.)"
+    },
+    "transactions": {
+        "title": "Транзакции",
+        "addTransaction": "Добавить транзакцию",
+        "type": "Тип",
+        "amount": "Сумма",
+        "category": "Категория",
+        "account": "Счет",
+        "targetAccount": "Счет зачисления",
+        "date": "Дата",
+        "description": "Описание (необязательно)",
+        "save": "Сохранить",
+        "cancel": "Отмена",
+        "income": "Доход",
+        "expense": "Расход",
+        "transfer": "Перевод",
+        "deleteConfirm": "Подтверждаете удаление?"
+    },
+    "budget": {
+        "title": "Бюджеты",
+        "addBudget": "Добавить бюджет",
+        "remaining": "Остаток",
+        "spent": "Потрачено",
+        "of": "из",
+        "limit": "Лимит",
+        "noBudgets": "На этот месяц нет бюджетов"
+    },
+    "settings": {
+        "title": "Настройки",
+        "language": "Язык",
+        "categories": "Категории",
+        "accounts": "Счета"
+    },
+    "auth": {
+        "loginTitle": "Вход",
+        "registerTitle": "Регистрация",
+        "email": "Email",
+        "password": "Пароль",
+        "name": "Имя",
+        "loginBtn": "Войти",
+        "registerBtn": "Зарегистрироваться",
+        "noAccount": "Нет аккаунта?",
+        "hasAccount": "Уже есть аккаунт?",
+        "tgLogin": "Войти через Telegram"
+    }
+}

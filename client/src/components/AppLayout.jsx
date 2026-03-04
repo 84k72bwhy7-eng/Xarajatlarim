@@ -1,20 +1,27 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, PieChart, LogOut } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { logout } from '../lib/api';
 
 export default function AppLayout({ tgUser }) {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
+    const toggleLanguage = () => {
+        const newLang = i18n.language === 'uz' ? 'ru' : 'uz';
+        i18n.changeLanguage(newLang);
+    };
+
     const navItems = [
-        { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/transactions', icon: ReceiptText, label: 'Xarajatlar' },
-        { to: '/budgets', icon: PieChart, label: 'Byudjet' },
+        { to: '/', icon: LayoutDashboard, label: t('nav.dashboard') },
+        { to: '/transactions', icon: ReceiptText, label: t('nav.transactions') },
+        { to: '/budgets', icon: PieChart, label: t('nav.budget') },
     ];
 
     return (
@@ -27,10 +34,14 @@ export default function AppLayout({ tgUser }) {
                         PF
                     </div>
                     <span className="text-lg font-bold" style={{ color: 'var(--tg-theme-text-color, #0f172a)' }}>
-                        Xarajatlarim
+                        {t('app.title')}
                     </span>
                 </div>
                 <div className="flex items-center gap-3">
+                    <button onClick={toggleLanguage} className="flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 border border-slate-200" title={t('settings.language')}>
+                        <Globe size={16} />
+                        {i18n.language.toUpperCase()}
+                    </button>
                     {tgUser && (
                         <span className="text-sm font-medium hidden sm:block" style={{ color: 'var(--tg-theme-hint-color, #64748b)' }}>
                             {tgUser.first_name}

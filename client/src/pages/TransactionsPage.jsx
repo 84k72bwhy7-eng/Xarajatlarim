@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function TransactionsPage() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('ALL');
     // Mo'k (vaqtinchalik) ma'lumotlar
     const transactions = [
@@ -13,7 +15,7 @@ export default function TransactionsPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center mb-2">
-                <h1 className="text-2xl font-bold text-slate-900">Xarajatlar</h1>
+                <h1 className="text-2xl font-bold text-slate-900">{t('transactions.title')}</h1>
                 <button className="bg-indigo-600 text-white rounded-xl p-2.5 shadow-sm hover:bg-indigo-700">
                     <Plus size={24} />
                 </button>
@@ -22,8 +24,8 @@ export default function TransactionsPage() {
             {/* Tabs */}
             <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex text-sm font-medium">
                 <button className={`flex-1 py-2 rounded-lg transition ${activeTab === 'ALL' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('ALL')}>Barchasi</button>
-                <button className={`flex-1 py-2 rounded-lg transition ${activeTab === 'EXPENSE' ? 'bg-rose-50 text-rose-700' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('EXPENSE')}>Chiqim</button>
-                <button className={`flex-1 py-2 rounded-lg transition ${activeTab === 'INCOME' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('INCOME')}>Kirim</button>
+                <button className={`flex-1 py-2 rounded-lg transition ${activeTab === 'EXPENSE' ? 'bg-rose-50 text-rose-700' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('EXPENSE')}>{t('transactions.expense')}</button>
+                <button className={`flex-1 py-2 rounded-lg transition ${activeTab === 'INCOME' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('INCOME')}>{t('transactions.income')}</button>
             </div>
 
             {/* List */}

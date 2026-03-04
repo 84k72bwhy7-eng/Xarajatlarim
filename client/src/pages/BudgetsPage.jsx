@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Target, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function BudgetsPage() {
+    const { t } = useTranslation();
     const [budgets] = useState([
         { id: 1, category: { name: "Oziq-ovqat", icon: "🍔", color: "#10b981" }, amount: 500, spent: 420 },
         { id: 2, category: { name: "Transport", icon: "🚗", color: "#f59e0b" }, amount: 200, spent: 215 },
@@ -12,8 +14,8 @@ export default function BudgetsPage() {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center mb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Oylik Byudjetlar</h1>
-                    <p className="text-slate-500 text-sm mt-1">Xarajatlaringizni nazorat qiling</p>
+                    <h1 className="text-2xl font-bold text-slate-900">{t('budget.title')}</h1>
+                    <p className="text-slate-500 text-sm mt-1">{t('budget.limit')}</p>
                 </div>
                 <button className="bg-indigo-600 text-white rounded-xl p-2.5 shadow-sm shadow-indigo-200 hover:bg-indigo-700 transition">
                     <Plus size={20} />
@@ -46,8 +48,8 @@ export default function BudgetsPage() {
 
                             <div className="space-y-2 relative z-10">
                                 <div className="flex justify-between text-sm font-medium">
-                                    <span className={isOver ? 'text-rose-600' : 'text-slate-700'}>Ishlatildi: ${budget.spent}</span>
-                                    <span className="text-slate-400">Qoldi: ${Math.max(budget.amount - budget.spent, 0)}</span>
+                                    <span className={isOver ? 'text-rose-600' : 'text-slate-700'}>{t('budget.spent')}: ${budget.spent}</span>
+                                    <span className="text-slate-400">{t('budget.remaining')}: ${Math.max(budget.amount - budget.spent, 0)}</span>
                                 </div>
                                 <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                                     <div
@@ -55,7 +57,7 @@ export default function BudgetsPage() {
                                         style={{ width: `${percentage}%` }}
                                     ></div>
                                 </div>
-                                <p className="text-right text-xs text-slate-400 font-medium">{percentage.toFixed(0)}% limit</p>
+                                <p className="text-right text-xs text-slate-400 font-medium">{percentage.toFixed(0)}% {t('budget.limit')}</p>
                             </div>
 
                             {/* Background gradient hint */}
