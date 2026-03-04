@@ -260,7 +260,7 @@ export default function ProfilePage() {
                                 <span>{user?.name?.charAt(0)}</span>
                             )}
                         </div>
-                        <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-earth-600 flex items-center justify-center cursor-pointer shadow-lg hover:bg-earth-700 transition">
+                        <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition" style={{ backgroundColor: '#7d4e31' }}>
                             <Camera size={16} />
                             <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
                         </label>
@@ -351,7 +351,8 @@ export default function ProfilePage() {
                                 setCategoryForm({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a' });
                                 setIsCategoryModalOpen(true);
                             }}
-                            className="p-2 bg-earth-600 text-white rounded-xl shadow-lg hover:bg-earth-700 transition-all hover:scale-110 active:scale-95"
+                            className="p-2 text-white rounded-xl shadow-lg transition-all hover:scale-110 active:scale-95"
+                            style={{ backgroundColor: '#7d4e31' }}
                         >
                             <Plus size={20} strokeWidth={3} />
                         </button>
@@ -403,7 +404,8 @@ export default function ProfilePage() {
                                 setAccountForm({ name: '', type: 'CASH', balance: 0, color: '#1a4d3a', icon: 'wallet' });
                                 setIsAccountModalOpen(true);
                             }}
-                            className="p-2 bg-earth-600 text-white rounded-xl shadow-lg hover:bg-earth-700 transition-all hover:scale-110 active:scale-95"
+                            className="p-2 text-white rounded-xl shadow-lg transition-all hover:scale-110 active:scale-95"
+                            style={{ backgroundColor: '#7d4e31' }}
                         >
                             <Plus size={20} strokeWidth={3} />
                         </button>

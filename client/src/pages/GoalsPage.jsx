@@ -157,7 +157,7 @@ export default function GoalsPage() {
                     setEditing(null);
                     setForm({ name: '', targetAmount: '', icon: '🎯', color: '#2d7a55', deadline: '' });
                     setIsModalOpen(true);
-                }} className="p-2.5 bg-earth-600 text-white rounded-xl shadow-lg hover:bg-earth-700 transition-all hover:scale-110 active:scale-95">
+                }} className="p-2.5 text-white rounded-xl shadow-lg transition-all hover:scale-110 active:scale-95" style={{ backgroundColor: '#7d4e31' }}>
                     <Plus size={20} strokeWidth={3} />
                 </button>
             </div>
