@@ -21,8 +21,8 @@ export default function AppLayout({ tgUser, user }) {
     const navItems = [
         { to: '/', icon: LayoutDashboard, label: t('nav.dashboard') },
         { to: '/transactions', icon: ReceiptText, label: t('nav.transactions') },
-        { to: '/debts', icon: HandCoins, label: 'Qarzlar' },
-        { to: '/goals', icon: Target, label: 'Maqsadlar' },
+        { to: '/debts', icon: HandCoins, label: t('nav.debts') },
+        { to: '/goals', icon: Target, label: t('nav.goals') },
         { to: '/budgets', icon: PieChart, label: t('nav.budget') },
     ];
 
@@ -119,7 +119,7 @@ export default function AppLayout({ tgUser, user }) {
                         }
                     >
                         <User size={16} />
-                        Profil
+                        {t('nav.profile')}
                     </NavLink>
                 </div>
             </div>

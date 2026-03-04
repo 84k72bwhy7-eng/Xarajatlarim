@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Wallet, TrendingUp, TrendingDown,
-    ArrowUpRight, ArrowDownRight, CreditCard, Activity, Plus, Loader2, Leaf
+    ArrowUpRight, ArrowDownRight, CreditCard, Activity, Plus, Loader2, Leaf,
+    HandCoins, Target, ArrowDownLeft, ChevronRight
 } from 'lucide-react';
 import CashflowChart from './CashflowChart';
 import CategoryPieChart from './CategoryPieChart';
 import SafeToSpend from './SafeToSpend';
 import AddTransactionModal from './AddTransactionModal';
-import { getDashboardSummary } from '../lib/api';
+import { getDashboardSummary, getDebts, getGoals } from '../lib/api';
 
 const StatCard = ({ title, amount, trend, icon: Icon, isPositive, variant = 'light' }) => {
     const variants = {
@@ -47,12 +48,20 @@ export default function Dashboard({ tgUser }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [debtData, setDebtData] = useState({ debts: [], stats: {} });
+    const [goalData, setGoalData] = useState({ goals: [], stats: {} });
 
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await getDashboardSummary();
-            setData(res.data);
+            const [dashRes, debtsRes, goalsRes] = await Promise.allSettled([
+                getDashboardSummary(),
+                getDebts(),
+                getGoals()
+            ]);
+            if (dashRes.status === 'fulfilled') setData(dashRes.value.data);
+            if (debtsRes.status === 'fulfilled') setDebtData(debtsRes.value.data);
+            if (goalsRes.status === 'fulfilled') setGoalData(goalsRes.value.data);
         } catch (err) {
             console.error('Dashboard load error:', err);
         } finally {
@@ -166,6 +175,90 @@ export default function Dashboard({ tgUser }) {
 
                     {/* Right column */}
                     <div className="space-y-6">
+                        {/* Debts Widget */}
+                        <div className="rounded-2xl p-5" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-base font-bold flex items-center gap-2" style={{ color: '#1a4d3a' }}>
+                                    <HandCoins size={18} />
+                                    {t('debts.title')}
+                                </h3>
+                                <a href="/debts" className="text-xs font-medium flex items-center gap-0.5 hover:opacity-70 transition" style={{ color: '#2d7a55' }}>
+                                    {t('debts.viewAll')} <ChevronRight size={14} />
+                                </a>
+                            </div>
+                            {(debtData.debts || []).filter(d => !d.isPaid).length === 0 ? (
+                                <p className="text-sm text-center py-4" style={{ color: '#7d4e31' }}>{t('debts.noDebts')}</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    <div className="grid grid-cols-2 gap-2 mb-3">
+                                        <div className="bg-red-50 rounded-xl p-3 text-center">
+                                            <p className="text-xs text-red-400">{t('debts.iGave')}</p>
+                                            <p className="text-lg font-bold text-red-600">{Number(debtData.stats?.totalGivenRemaining || 0).toLocaleString()}</p>
+                                        </div>
+                                        <div className="bg-green-50 rounded-xl p-3 text-center">
+                                            <p className="text-xs text-green-400">{t('debts.iTook')}</p>
+                                            <p className="text-lg font-bold text-green-600">{Number(debtData.stats?.totalTakenRemaining || 0).toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                    {(debtData.debts || []).filter(d => !d.isPaid).slice(0, 3).map(debt => (
+                                        <div key={debt.id} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-forest-50 transition">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs ${debt.type === 'GIVEN' ? 'bg-red-400' : 'bg-green-500'}`}>
+                                                    {debt.type === 'GIVEN' ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{debt.personName}</p>
+                                                    <p className="text-[10px] text-slate-400">{debt.type === 'GIVEN' ? t('debts.iGave') : t('debts.iTook')}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm font-bold" style={{ color: '#1a4d3a' }}>{Number(debt.amount - debt.paidAmount).toLocaleString()}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Goals Widget */}
+                        <div className="rounded-2xl p-5" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(125,78,49,0.08)' }}>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-base font-bold flex items-center gap-2" style={{ color: '#7d4e31' }}>
+                                    <Target size={18} />
+                                    {t('goals.title')}
+                                </h3>
+                                <a href="/goals" className="text-xs font-medium flex items-center gap-0.5 hover:opacity-70 transition" style={{ color: '#a06040' }}>
+                                    {t('goals.viewAll')} <ChevronRight size={14} />
+                                </a>
+                            </div>
+                            {(goalData.goals || []).filter(g => !g.isCompleted).length === 0 ? (
+                                <p className="text-sm text-center py-4" style={{ color: '#7d4e31' }}>{t('goals.noGoals')}</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {(goalData.goals || []).filter(g => !g.isCompleted).slice(0, 3).map(goal => {
+                                        const progress = goal.targetAmount > 0 ? Math.min(Math.round((goal.savedAmount / goal.targetAmount) * 100), 100) : 0;
+                                        return (
+                                            <div key={goal.id} className="group">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-lg">{goal.icon}</span>
+                                                        <span className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{goal.name}</span>
+                                                    </div>
+                                                    <span className="text-xs font-bold" style={{ color: goal.color }}>{progress}%</span>
+                                                </div>
+                                                <div className="w-full h-2 bg-forest-50 rounded-full overflow-hidden">
+                                                    <div className="h-full rounded-full transition-all duration-700"
+                                                        style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${goal.color}, ${goal.color}cc)` }} />
+                                                </div>
+                                                <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                                                    <span>{Number(goal.savedAmount).toLocaleString()}</span>
+                                                    <span>{Number(goal.targetAmount).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
                         {d.safeToSpend && <SafeToSpend data={d.safeToSpend} />}
                         {d.categoryBreakdown.length > 0 && <CategoryPieChart data={d.categoryBreakdown} />}
                     </div>

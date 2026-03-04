@@ -11,17 +11,15 @@ export default function DebtsPage() {
     const [debts, setDebts] = useState([]);
     const [stats, setStats] = useState({});
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('ALL'); // ALL, GIVEN, TAKEN
+    const [filter, setFilter] = useState('ALL');
     const [showPaid, setShowPaid] = useState(false);
 
-    // Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({
         type: 'GIVEN', personName: '', amount: '', description: '', dueDate: ''
     });
 
-    // Pay modal
     const [isPayModalOpen, setIsPayModalOpen] = useState(false);
     const [payingDebt, setPayingDebt] = useState(null);
     const [payAmount, setPayAmount] = useState('');
@@ -72,7 +70,7 @@ export default function DebtsPage() {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("Ushbu qarzni o'chirmoqchimisiz?")) return;
+        if (!confirm(t('debts.deleteConfirm'))) return;
         try {
             await deleteDebt(id);
             loadData();
@@ -124,24 +122,24 @@ export default function DebtsPage() {
                     <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
                         <HandCoins size={22} />
                     </div>
-                    <h1 className="text-2xl font-bold">Qarzlar</h1>
+                    <h1 className="text-2xl font-bold">{t('debts.title')}</h1>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/10 rounded-xl p-4 border border-white/10">
                         <div className="flex items-center gap-2 mb-1">
                             <ArrowUpRight size={16} className="text-red-300" />
-                            <span className="text-xs text-white/60">Men berdim</span>
+                            <span className="text-xs text-white/60">{t('debts.iGave')}</span>
                         </div>
                         <p className="text-xl font-bold">{formatNumber(stats.totalGivenRemaining)}</p>
-                        <p className="text-xs text-white/50">Jami: {formatNumber(stats.totalGiven)}</p>
+                        <p className="text-xs text-white/50">{t('debts.total')}: {formatNumber(stats.totalGiven)}</p>
                     </div>
                     <div className="bg-white/10 rounded-xl p-4 border border-white/10">
                         <div className="flex items-center gap-2 mb-1">
                             <ArrowDownLeft size={16} className="text-green-300" />
-                            <span className="text-xs text-white/60">Men oldim</span>
+                            <span className="text-xs text-white/60">{t('debts.iTook')}</span>
                         </div>
                         <p className="text-xl font-bold">{formatNumber(stats.totalTakenRemaining)}</p>
-                        <p className="text-xs text-white/50">Jami: {formatNumber(stats.totalTaken)}</p>
+                        <p className="text-xs text-white/50">{t('debts.total')}: {formatNumber(stats.totalTaken)}</p>
                     </div>
                 </div>
             </div>
@@ -150,9 +148,9 @@ export default function DebtsPage() {
             <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                     {[
-                        { id: 'ALL', label: 'Hammasi' },
-                        { id: 'GIVEN', label: 'Berdim' },
-                        { id: 'TAKEN', label: 'Oldim' },
+                        { id: 'ALL', label: t('debts.all') },
+                        { id: 'GIVEN', label: t('debts.gave') },
+                        { id: 'TAKEN', label: t('debts.took') },
                     ].map(f => (
                         <button key={f.id} onClick={() => setFilter(f.id)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${filter === f.id
@@ -171,18 +169,17 @@ export default function DebtsPage() {
                 </button>
             </div>
 
-            {/* Show paid toggle */}
             <label className="flex items-center gap-2 text-sm text-slate-500 cursor-pointer select-none">
                 <input type="checkbox" checked={showPaid} onChange={e => setShowPaid(e.target.checked)}
                     className="rounded border-forest-300 text-forest-600 focus:ring-forest-500" />
-                Tugallangan qarzlarni ko'rsatish
+                {t('debts.showPaid')}
             </label>
 
             {/* Debts List */}
             {filteredDebts.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-forest-200">
                     <HandCoins className="mx-auto text-forest-200 mb-3" size={48} />
-                    <p className="text-slate-400 text-sm">Hozircha qarz yo'q</p>
+                    <p className="text-slate-400 text-sm">{t('debts.noDebts')}</p>
                 </div>
             ) : (
                 <div className="space-y-3">
@@ -200,10 +197,10 @@ export default function DebtsPage() {
                                             <div className="flex items-center gap-2">
                                                 <p className="font-bold text-forest-900">{debt.personName}</p>
                                                 {debt.isPaid && <CheckCircle2 size={14} className="text-green-500" />}
-                                                {isOverdue && <span className="text-xs text-red-500 font-semibold">Muddati o'tgan!</span>}
+                                                {isOverdue && <span className="text-xs text-red-500 font-semibold">{t('debts.overdue')}</span>}
                                             </div>
                                             <p className="text-xs text-slate-400">
-                                                {debt.type === 'GIVEN' ? 'Men berdim' : 'Men oldim'}
+                                                {debt.type === 'GIVEN' ? t('debts.iGave') : t('debts.iTook')}
                                                 {debt.description && ` • ${debt.description}`}
                                             </p>
                                         </div>
@@ -211,7 +208,7 @@ export default function DebtsPage() {
                                     <div className="text-right">
                                         <p className="font-bold text-forest-900 text-lg">{formatNumber(debt.amount)}</p>
                                         {debt.paidAmount > 0 && (
-                                            <p className="text-xs text-green-600">-{formatNumber(debt.paidAmount)} qaytarildi</p>
+                                            <p className="text-xs text-green-600">-{formatNumber(debt.paidAmount)} {t('debts.returned')}</p>
                                         )}
                                     </div>
                                 </div>
@@ -219,8 +216,8 @@ export default function DebtsPage() {
                                 {/* Progress bar */}
                                 <div className="mb-3">
                                     <div className="flex justify-between text-xs text-slate-400 mb-1">
-                                        <span>{progress}% qaytarildi</span>
-                                        <span>Qoldiq: {formatNumber(debt.amount - debt.paidAmount)}</span>
+                                        <span>{progress}% {t('debts.returned')}</span>
+                                        <span>{t('debts.remaining')}: {formatNumber(debt.amount - debt.paidAmount)}</span>
                                     </div>
                                     <div className="w-full h-2 bg-forest-50 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-500"
@@ -228,7 +225,6 @@ export default function DebtsPage() {
                                     </div>
                                 </div>
 
-                                {/* Footer */}
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3 text-xs text-slate-400">
                                         {debt.dueDate && (
@@ -242,7 +238,7 @@ export default function DebtsPage() {
                                         {!debt.isPaid && (
                                             <button onClick={() => openPay(debt)}
                                                 className="px-3 py-1.5 text-xs font-semibold text-white bg-forest-600 rounded-lg hover:bg-forest-700 transition flex items-center gap-1">
-                                                <Banknote size={13} /> To'lash
+                                                <Banknote size={13} /> {t('debts.pay')}
                                             </button>
                                         )}
                                         <button onClick={() => openEdit(debt)} className="p-1.5 text-slate-400 hover:text-earth-600 transition">
@@ -265,18 +261,17 @@ export default function DebtsPage() {
                     <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in duration-200">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-xl font-bold text-forest-900">
-                                {editing ? 'Qarzni tahrirlash' : 'Yangi qarz'}
+                                {editing ? t('debts.editDebt') : t('debts.newDebt')}
                             </h3>
                             <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
                                 <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Type */}
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1">Turi</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1">{t('debts.type')}</label>
                                 <div className="flex gap-2">
-                                    {[{ id: 'GIVEN', label: 'Men berdim', color: '#dc2626' }, { id: 'TAKEN', label: 'Men oldim', color: '#16a34a' }].map(tp => (
+                                    {[{ id: 'GIVEN', label: t('debts.iGave'), color: '#dc2626' }, { id: 'TAKEN', label: t('debts.iTook'), color: '#16a34a' }].map(tp => (
                                         <button key={tp.id} type="button"
                                             onClick={() => setForm(f => ({ ...f, type: tp.id }))}
                                             className={`flex-1 py-3 rounded-xl font-bold transition-all border-2 ${form.type === tp.id
@@ -288,42 +283,35 @@ export default function DebtsPage() {
                                 </div>
                             </div>
 
-                            {/* Person name */}
                             <div>
                                 <label className="block text-sm font-bold text-forest-800 mb-1">
-                                    <User size={13} className="inline mr-1" />Kimga / Kimdan
+                                    <User size={13} className="inline mr-1" />{t('debts.personName')}
                                 </label>
                                 <input type="text" required value={form.personName}
                                     onChange={e => setForm(f => ({ ...f, personName: e.target.value }))}
-                                    placeholder="Ism kiriting..."
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500" />
                             </div>
 
-                            {/* Amount */}
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1">Summa</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1">{t('debts.amount')}</label>
                                 <input type="number" required min="1" value={form.amount}
                                     onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
-                                    placeholder="100 000"
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500" />
                             </div>
 
-                            {/* Due date */}
                             <div>
                                 <label className="block text-sm font-bold text-forest-800 mb-1">
-                                    <Calendar size={13} className="inline mr-1" />Qaytarish muddati
+                                    <Calendar size={13} className="inline mr-1" />{t('debts.dueDate')}
                                 </label>
                                 <input type="date" value={form.dueDate}
                                     onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500" />
                             </div>
 
-                            {/* Description */}
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1">Izoh</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1">{t('debts.note')}</label>
                                 <input type="text" value={form.description}
                                     onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                                    placeholder="Ixtiyoriy izoh..."
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500" />
                             </div>
 
@@ -331,12 +319,12 @@ export default function DebtsPage() {
                                 <button type="button" onClick={() => setIsModalOpen(false)}
                                     className="flex-1 py-3 px-4 rounded-xl font-bold transition-colors"
                                     style={{ color: '#7d4e31', backgroundColor: '#f0faf5', border: '1px solid #dff2ea' }}>
-                                    Bekor qilish
+                                    {t('debts.cancel')}
                                 </button>
                                 <button type="submit"
                                     className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95"
                                     style={{ background: 'linear-gradient(135deg, #1a4d3a, #2d7a55)', boxShadow: '0 4px 12px rgba(26,77,58,0.3)' }}>
-                                    Saqlash
+                                    {t('debts.save')}
                                 </button>
                             </div>
                         </form>
@@ -348,26 +336,26 @@ export default function DebtsPage() {
             {isPayModalOpen && payingDebt && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
-                        <h3 className="text-lg font-bold text-forest-900 mb-1">To'lov kiritish</h3>
+                        <h3 className="text-lg font-bold text-forest-900 mb-1">{t('debts.payTitle')}</h3>
                         <p className="text-sm text-slate-400 mb-4">
-                            {payingDebt.personName} — Qoldiq: {formatNumber(payingDebt.amount - payingDebt.paidAmount)}
+                            {payingDebt.personName} — {t('debts.remaining')}: {formatNumber(payingDebt.amount - payingDebt.paidAmount)}
                         </p>
                         <form onSubmit={handlePay} className="space-y-4">
                             <input type="number" required min="1"
                                 max={payingDebt.amount - payingDebt.paidAmount}
                                 value={payAmount}
                                 onChange={e => setPayAmount(e.target.value)}
-                                placeholder="To'lov summasi"
+                                placeholder={t('debts.payAmount')}
                                 className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 text-lg font-bold text-center" />
                             <div className="flex gap-3">
                                 <button type="button" onClick={() => setIsPayModalOpen(false)}
                                     className="flex-1 py-3 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition">
-                                    Bekor
+                                    {t('debts.cancel')}
                                 </button>
                                 <button type="submit"
                                     className="flex-1 py-3 text-white rounded-xl font-bold transition-all active:scale-95"
                                     style={{ background: 'linear-gradient(135deg, #1a4d3a, #2d7a55)' }}>
-                                    To'lash
+                                    {t('debts.pay')}
                                 </button>
                             </div>
                         </form>

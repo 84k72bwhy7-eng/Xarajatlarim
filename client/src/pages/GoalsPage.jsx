@@ -15,14 +15,12 @@ export default function GoalsPage() {
     const [loading, setLoading] = useState(true);
     const [showCompleted, setShowCompleted] = useState(false);
 
-    // Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({
         name: '', targetAmount: '', icon: '🎯', color: '#2d7a55', deadline: ''
     });
 
-    // Add money modal
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addingGoal, setAddingGoal] = useState(null);
     const [addAmount, setAddAmount] = useState('');
@@ -73,7 +71,7 @@ export default function GoalsPage() {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("Ushbu maqsadni o'chirmoqchimisiz?")) return;
+        if (!confirm(t('goals.deleteConfirm'))) return;
         try {
             await deleteGoal(id);
             loadData();
@@ -120,26 +118,26 @@ export default function GoalsPage() {
                     <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
                         <Target size={22} />
                     </div>
-                    <h1 className="text-2xl font-bold">Maqsadlar</h1>
+                    <h1 className="text-2xl font-bold">{t('goals.title')}</h1>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                     <div className="bg-white/10 rounded-xl p-3 border border-white/10 text-center">
                         <p className="text-2xl font-bold">{stats.activeCount || 0}</p>
-                        <p className="text-xs text-white/60">Faol</p>
+                        <p className="text-xs text-white/60">{t('goals.active')}</p>
                     </div>
                     <div className="bg-white/10 rounded-xl p-3 border border-white/10 text-center">
                         <p className="text-2xl font-bold">{stats.overallProgress || 0}%</p>
-                        <p className="text-xs text-white/60">Umumiy</p>
+                        <p className="text-xs text-white/60">{t('goals.overall')}</p>
                     </div>
                     <div className="bg-white/10 rounded-xl p-3 border border-white/10 text-center">
                         <p className="text-2xl font-bold">{stats.completedCount || 0}</p>
-                        <p className="text-xs text-white/60">Tugallangan</p>
+                        <p className="text-xs text-white/60">{t('goals.completed')}</p>
                     </div>
                 </div>
                 <div className="mt-3 bg-white/10 rounded-xl p-3 border border-white/10">
                     <div className="flex justify-between text-xs text-white/60 mb-1">
-                        <span>Yig'ildi: {formatNumber(stats.totalSaved)}</span>
-                        <span>Maqsad: {formatNumber(stats.totalTarget)}</span>
+                        <span>{t('goals.collected')}: {formatNumber(stats.totalSaved)}</span>
+                        <span>{t('goals.target')}: {formatNumber(stats.totalTarget)}</span>
                     </div>
                     <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-700"
@@ -153,7 +151,7 @@ export default function GoalsPage() {
                 <label className="flex items-center gap-2 text-sm text-slate-500 cursor-pointer select-none">
                     <input type="checkbox" checked={showCompleted} onChange={e => setShowCompleted(e.target.checked)}
                         className="rounded border-forest-300 text-forest-600 focus:ring-forest-500" />
-                    Tugallanganlarni ko'rsatish
+                    {t('goals.showCompleted')}
                 </label>
                 <button onClick={() => {
                     setEditing(null);
@@ -168,8 +166,8 @@ export default function GoalsPage() {
             {filteredGoals.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-forest-200">
                     <Target className="mx-auto text-forest-200 mb-3" size={48} />
-                    <p className="text-slate-400 text-sm">Hozircha maqsad yo'q</p>
-                    <p className="text-xs text-slate-300 mt-1">Birinchi maqsadingizni qo'shing!</p>
+                    <p className="text-slate-400 text-sm">{t('goals.noGoals')}</p>
+                    <p className="text-xs text-slate-300 mt-1">{t('goals.firstGoal')}</p>
                 </div>
             ) : (
                 <div className="space-y-3">
@@ -190,7 +188,7 @@ export default function GoalsPage() {
                                                 <p className="font-bold text-forest-900">{goal.name}</p>
                                                 {goal.isCompleted && (
                                                     <span className="flex items-center gap-1 text-xs text-green-500 font-semibold">
-                                                        <Sparkles size={12} /> Erishildi!
+                                                        <Sparkles size={12} /> {t('goals.achieved')}
                                                     </span>
                                                 )}
                                             </div>
@@ -205,7 +203,7 @@ export default function GoalsPage() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs text-slate-400">Maqsad</p>
+                                        <p className="text-xs text-slate-400">{t('goals.target')}</p>
                                         <p className="font-bold text-forest-900">{formatNumber(goal.targetAmount)}</p>
                                     </div>
                                 </div>
@@ -213,7 +211,7 @@ export default function GoalsPage() {
                                 {/* Progress bar */}
                                 <div className="mb-3">
                                     <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-forest-600 font-semibold">{formatNumber(goal.savedAmount)} yig'ildi</span>
+                                        <span className="text-forest-600 font-semibold">{formatNumber(goal.savedAmount)} {t('goals.collected').toLowerCase()}</span>
                                         <span className={`font-bold ${progress >= 100 ? 'text-green-500' : 'text-slate-400'}`}>{progress}%</span>
                                     </div>
                                     <div className="w-full h-3 bg-forest-50 rounded-full overflow-hidden">
@@ -226,7 +224,7 @@ export default function GoalsPage() {
                                             }} />
                                     </div>
                                     {!goal.isCompleted && (
-                                        <p className="text-xs text-slate-400 mt-1">Yana {formatNumber(remaining > 0 ? remaining : 0)} kerak</p>
+                                        <p className="text-xs text-slate-400 mt-1">{t('goals.needMore').replace('{{amount}}', formatNumber(remaining > 0 ? remaining : 0))}</p>
                                     )}
                                 </div>
 
@@ -236,7 +234,7 @@ export default function GoalsPage() {
                                         <button onClick={() => openAddMoney(goal)}
                                             className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg hover:opacity-90 transition flex items-center gap-1"
                                             style={{ background: goal.color }}>
-                                            <Coins size={13} /> Pul qo'shish
+                                            <Coins size={13} /> {t('goals.addMoney')}
                                         </button>
                                     )}
                                     <button onClick={() => openEdit(goal)} className="p-1.5 text-slate-400 hover:text-earth-600 transition">
@@ -258,34 +256,29 @@ export default function GoalsPage() {
                     <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in duration-200">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-xl font-bold text-forest-900">
-                                {editing ? 'Maqsadni tahrirlash' : 'Yangi maqsad'}
+                                {editing ? t('goals.editGoal') : t('goals.newGoal')}
                             </h3>
                             <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
                                 <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Name */}
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1">Nomi</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1">{t('goals.name')}</label>
                                 <input type="text" required value={form.name}
                                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                                    placeholder="Masalan: Yangi telefon"
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500" />
                             </div>
 
-                            {/* Target amount */}
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1">Maqsad summasi</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1">{t('goals.targetAmount')}</label>
                                 <input type="number" required min="1" value={form.targetAmount}
                                     onChange={e => setForm(f => ({ ...f, targetAmount: e.target.value }))}
-                                    placeholder="5 000 000"
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500" />
                             </div>
 
-                            {/* Icon picker */}
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1">Ikonka</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1">{t('goals.icon')}</label>
                                 <div className="flex flex-wrap gap-2">
                                     {GOAL_ICONS.map(icon => (
                                         <button key={icon} type="button"
@@ -299,16 +292,15 @@ export default function GoalsPage() {
                                 </div>
                             </div>
 
-                            {/* Color + Deadline */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1">Rang</label>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1">{t('goals.color')}</label>
                                     <input type="color" value={form.color}
                                         onChange={e => setForm(f => ({ ...f, color: e.target.value }))}
                                         className="w-full h-[46px] p-1 bg-forest-50 border border-forest-100 rounded-xl outline-none cursor-pointer" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1">Muddat</label>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1">{t('goals.deadline')}</label>
                                     <input type="date" value={form.deadline}
                                         onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
                                         className="w-full px-3 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 text-sm" />
@@ -319,12 +311,12 @@ export default function GoalsPage() {
                                 <button type="button" onClick={() => setIsModalOpen(false)}
                                     className="flex-1 py-3 px-4 rounded-xl font-bold transition-colors"
                                     style={{ color: '#7d4e31', backgroundColor: '#f0faf5', border: '1px solid #dff2ea' }}>
-                                    Bekor qilish
+                                    {t('goals.cancel')}
                                 </button>
                                 <button type="submit"
                                     className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95"
                                     style={{ background: 'linear-gradient(135deg, #7d4e31, #a06040)', boxShadow: '0 4px 12px rgba(125,78,49,0.3)' }}>
-                                    Saqlash
+                                    {t('goals.save')}
                                 </button>
                             </div>
                         </form>
@@ -336,24 +328,24 @@ export default function GoalsPage() {
             {isAddModalOpen && addingGoal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
-                        <h3 className="text-lg font-bold text-forest-900 mb-1">Pul qo'shish</h3>
+                        <h3 className="text-lg font-bold text-forest-900 mb-1">{t('goals.addMoneyTitle')}</h3>
                         <p className="text-sm text-slate-400 mb-4">
-                            {addingGoal.icon} {addingGoal.name} — Yana {formatNumber(addingGoal.targetAmount - addingGoal.savedAmount)} kerak
+                            {addingGoal.icon} {addingGoal.name}
                         </p>
                         <form onSubmit={handleAddMoney} className="space-y-4">
                             <input type="number" required min="1" value={addAmount}
                                 onChange={e => setAddAmount(e.target.value)}
-                                placeholder="Summa kiriting"
+                                placeholder={t('debts.amount')}
                                 className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 text-lg font-bold text-center" />
                             <div className="flex gap-3">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)}
                                     className="flex-1 py-3 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition">
-                                    Bekor
+                                    {t('goals.cancel')}
                                 </button>
                                 <button type="submit"
                                     className="flex-1 py-3 text-white rounded-xl font-bold transition-all active:scale-95"
                                     style={{ background: `linear-gradient(135deg, ${addingGoal.color}, ${addingGoal.color}cc)` }}>
-                                    Qo'shish
+                                    {t('goals.addMoney')}
                                 </button>
                             </div>
                         </form>
