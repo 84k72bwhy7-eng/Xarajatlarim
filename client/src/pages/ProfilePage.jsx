@@ -287,9 +287,9 @@ export default function ProfilePage() {
                                 setCategoryForm({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a' });
                                 setIsCategoryModalOpen(true);
                             }}
-                            className="p-2 bg-forest-600 text-white rounded-xl shadow-md hover:bg-forest-700 transition"
+                            className="p-2 bg-earth-600 text-white rounded-xl shadow-lg hover:bg-earth-700 transition-all hover:scale-110 active:scale-95"
                         >
-                            <Plus size={20} />
+                            <Plus size={20} strokeWidth={3} />
                         </button>
                     </div>
                     {categories.length === 0 ? (
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                                 setAccountForm({ name: '', type: 'CASH', balance: 0, color: '#1a4d3a', icon: 'wallet' });
                                 setIsAccountModalOpen(true);
                             }}
-                            className="p-2 bg-forest-600 text-white rounded-xl shadow-md hover:bg-forest-700 transition"
+                            className="p-2 bg-earth-600 text-white rounded-xl shadow-lg hover:bg-earth-700 transition-all hover:scale-110 active:scale-95"
                         >
                             <Plus size={20} />
                         </button>
@@ -468,9 +468,11 @@ export default function ProfilePage() {
                                             key={type}
                                             type="button"
                                             onClick={() => setCategoryForm(c => ({ ...c, type }))}
-                                            className={`flex-1 py-2.5 rounded-xl font-bold transition ${categoryForm.type === type
-                                                ? 'bg-forest-600 text-white shadow-md'
-                                                : 'bg-forest-50 text-slate-400 hover:bg-forest-100'
+                                            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 border-2 ${categoryForm.type === type
+                                                ? type === 'EXPENSE'
+                                                    ? 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-100'
+                                                    : 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100'
+                                                : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
                                             {type === 'EXPENSE' ? 'Chiqim' : 'Kirim'}
@@ -482,13 +484,13 @@ export default function ProfilePage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsCategoryModalOpen(false)}
-                                    className="flex-1 py-3 text-slate-400 font-bold hover:text-slate-600"
+                                    className="flex-1 py-3 px-4 rounded-xl text-slate-500 font-bold bg-slate-100 hover:bg-slate-200 transition-colors"
                                 >
                                     Bekor qilish
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-3 bg-forest-600 text-white rounded-xl font-bold shadow-lg shadow-forest-200 hover:bg-forest-700"
+                                    className="flex-[1.5] py-3 px-6 bg-forest-700 text-white rounded-xl font-bold shadow-lg shadow-forest-100 hover:bg-forest-800 transition-all active:scale-95"
                                 >
                                     Saqlash
                                 </button>
@@ -530,13 +532,13 @@ export default function ProfilePage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsAccountModalOpen(false)}
-                                    className="flex-1 py-3 text-slate-400 font-bold hover:text-slate-600"
+                                    className="flex-1 py-3 px-4 rounded-xl text-slate-500 font-bold bg-slate-100 hover:bg-slate-200 transition-colors"
                                 >
                                     Bekor qilish
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-3 bg-forest-600 text-white rounded-xl font-bold shadow-lg shadow-forest-200 hover:bg-forest-700"
+                                    className="flex-[1.5] py-3 px-6 bg-forest-700 text-white rounded-xl font-bold shadow-lg shadow-forest-100 hover:bg-forest-800 transition-all active:scale-95"
                                 >
                                     Saqlash
                                 </button>
