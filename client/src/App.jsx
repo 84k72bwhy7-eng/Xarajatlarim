@@ -5,6 +5,8 @@ import AppLayout from './components/AppLayout';
 import AuthPage from './pages/AuthPage';
 import TransactionsPage from './pages/TransactionsPage';
 import BudgetsPage from './pages/BudgetsPage';
+import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
 import { initializeTelegramApp, tg } from './lib/telegram';
 import { loginWithTelegram } from './lib/api';
 
@@ -16,23 +18,27 @@ function ProtectedRoute({ children, isAuthenticated }) {
 function App() {
   const [tgUser, setTgUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const [isWebApp, setIsWebApp] = useState(false);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || 'null'));
 
   useEffect(() => {
     // 1. TWA initializatsiyasi
-    const user = initializeTelegramApp();
-    if (user) {
-      setTgUser(user);
-      setIsWebApp(true);
+    const twaUser = initializeTelegramApp();
+    if (twaUser) {
+      setTgUser(twaUser);
       // Agar TWA bo'lsa, avtomatik login qildirish
       loginWithTelegram()
-        .then(() => setIsAuthenticated(true))
+        .then((res) => {
+          setIsAuthenticated(true);
+          setUser(res.user);
+        })
         .catch(err => console.error("TWA Login xatosi:", err));
     }
 
     // 2. Token o'zgarganini kuzatish (Login page dan keyin)
     const checkAuth = () => {
-      setIsAuthenticated(!!localStorage.getItem('token'));
+      const token = localStorage.getItem('token');
+      setIsAuthenticated(!!token);
+      setUser(JSON.parse(localStorage.getItem('user') || 'null'));
     };
 
     window.addEventListener('storage', checkAuth);
@@ -53,13 +59,18 @@ function App() {
           path="/"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AppLayout tgUser={tgUser} />
+              <AppLayout tgUser={tgUser} user={user} />
             </ProtectedRoute>
           }
         >
           <Route index element={<Dashboard tgUser={tgUser} />} />
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="budgets" element={<BudgetsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          {user?.role === 'SUPERADMIN' && (
+            <Route path="admin" element={<AdminPage />} />
+          )}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>

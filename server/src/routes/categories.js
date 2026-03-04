@@ -12,10 +12,9 @@ router.get('/', async (req, res) => {
         const { type } = req.query;
         const where = { userId: req.userId };
         if (type) where.type = type;
-
         const categories = await prisma.category.findMany({
             where,
-            orderBy: { name: 'asc' },
+            orderBy: [{ type: 'asc' }, { name: 'asc' }],
         });
         res.json(categories);
     } catch (error) {
@@ -26,14 +25,15 @@ router.get('/', async (req, res) => {
 // POST /api/categories
 router.post('/', async (req, res) => {
     try {
-        const { name, icon, color, type, parentId } = req.body;
+        const { name, icon, color, type } = req.body;
+        if (!name || !type) return res.status(400).json({ error: 'name va type kerak' });
+
         const category = await prisma.category.create({
             data: {
                 name,
                 icon: icon || '📦',
-                color: color || '#8b5cf6',
+                color: color || '#2d7a55',
                 type: type || 'EXPENSE',
-                parentId,
                 userId: req.userId,
             },
         });
@@ -46,13 +46,45 @@ router.post('/', async (req, res) => {
     }
 });
 
+// PUT /api/categories/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const { name, icon, color, type } = req.body;
+
+        // Foydalanuvchi o'z kategoriyasini tahrirlashi kerak
+        const existing = await prisma.category.findFirst({
+            where: { id: req.params.id, userId: req.userId }
+        });
+        if (!existing) return res.status(404).json({ error: 'Kategoriya topilmadi' });
+
+        const updated = await prisma.category.update({
+            where: { id: req.params.id },
+            data: {
+                ...(name && { name }),
+                ...(icon && { icon }),
+                ...(color && { color }),
+                ...(type && { type }),
+            },
+        });
+        res.json(updated);
+    } catch (error) {
+        res.status(500).json({ error: "Kategoriyani yangilashda xato" });
+    }
+});
+
 // DELETE /api/categories/:id
 router.delete('/:id', async (req, res) => {
     try {
+        const existing = await prisma.category.findFirst({
+            where: { id: req.params.id, userId: req.userId }
+        });
+        if (!existing) return res.status(404).json({ error: 'Kategoriya topilmadi' });
+
         await prisma.category.delete({ where: { id: req.params.id } });
         res.json({ message: "Kategoriya o'chirildi" });
     } catch (error) {
         res.status(500).json({ error: "Kategoriyani o'chirishda xato" });
     }
 });
+
 export default router;

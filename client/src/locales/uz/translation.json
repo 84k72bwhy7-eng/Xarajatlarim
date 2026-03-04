@@ -64,6 +64,23 @@
         "registerBtn": "Ro'yxatdan o'tish",
         "noAccount": "Akkauntingiz yo'qmi? Ro'yxatdan o'ting",
         "hasAccount": "Akkauntingiz bormi? Kirish",
-        "tgLogin": "Telegram Mini App orqali kirsangiz, bu jarayon avtomatik bajariladi"
+        "tgLogin": "Telegram Mini App orqali kirsangiz, bu jarayon avtomatik bajariladi",
+        "user": "Foydalanuvchi"
+    },
+    "profile": {
+        "title": "Profil",
+        "info": "Ma'lumotlar",
+        "categories": "Kategoriyalar",
+        "accounts": "Hisoblar",
+        "security": "Xavfsizlik",
+        "passwordChange": "Parolni o'zgartirish",
+        "save": "Saqlash"
+    },
+    "admin": {
+        "title": "SuperAdmin Paneli",
+        "stats": "Statistika",
+        "users": "Foydalanuvchilar",
+        "transactions": "Tranzaksiyalar",
+        "volume": "Umumiy aylanma"
     }
 }

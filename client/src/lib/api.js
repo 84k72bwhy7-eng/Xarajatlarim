@@ -65,9 +65,31 @@ export const getDashboardSummary = () => api.get('/dashboard/summary');
 export const getSafeToSpend = () => api.get('/dashboard/safe-to-spend');
 export const getTransactions = (params) => api.get('/transactions', { params });
 export const createTransaction = (data) => api.post('/transactions', data);
+
+// Categories
 export const getCategories = () => api.get('/categories');
+export const createCategory = (data) => api.post('/categories', data);
+export const updateCategory = (id, data) => api.put(`/categories/${id}`, data);
+export const deleteCategory = (id) => api.delete(`/categories/${id}`);
+
+// Accounts
 export const getAccounts = () => api.get('/accounts');
+export const createAccount = (data) => api.post('/accounts', data);
+export const updateAccount = (id, data) => api.put(`/accounts/${id}`, data);
+export const deleteAccount = (id) => api.delete(`/accounts/${id}`);
+
 export const getBudgets = () => api.get('/budgets');
 export const createBudget = (data) => api.post('/budgets', data);
+
+// Profile
+export const getProfile = () => api.get('/profile');
+export const updateProfile = (data) => api.put('/profile', data);
+export const updatePassword = (data) => api.put('/profile/password', data);
+
+// Admin
+export const getAdminUsers = () => api.get('/admin/users');
+export const updateAdminUserRole = (id, role) => api.put(`/admin/users/${id}/role`, { role });
+export const deleteAdminUser = (id) => api.delete(`/admin/users/${id}`);
+export const getAdminStats = () => api.get('/admin/stats');
 
 export default api;

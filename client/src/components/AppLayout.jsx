@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Leaf } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Leaf, User, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logout } from '../lib/api';
 
-export default function AppLayout({ tgUser }) {
+export default function AppLayout({ tgUser, user }) {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
 
@@ -24,13 +24,18 @@ export default function AppLayout({ tgUser }) {
         { to: '/budgets', icon: PieChart, label: t('nav.budget') },
     ];
 
+    // Add Admin link if superadmin
+    if (user?.role === 'SUPERADMIN') {
+        navItems.push({ to: '/admin', icon: Shield, label: 'Admin' });
+    }
+
     return (
         <div className="min-h-screen pb-20 sm:pb-0" style={{ backgroundColor: '#f0f5f2' }}>
             {/* Top Navbar */}
             <nav className="sticky top-0 z-30 px-4 py-3 flex items-center justify-between"
                 style={{ backgroundColor: '#1a4d3a', boxShadow: '0 2px 12px rgba(26, 77, 58, 0.4)' }}>
                 {/* Logo */}
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
                         <Leaf size={18} className="text-white" />
@@ -51,26 +56,29 @@ export default function AppLayout({ tgUser }) {
                         {i18n.language.toUpperCase()}
                     </button>
 
-                    {/* User name */}
-                    {tgUser && (
-                        <span className="text-sm font-medium text-white/70 hidden sm:block">
-                            {tgUser.first_name}
+                    {/* User display */}
+                    <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/profile')}>
+                        {/* User name */}
+                        <span className="text-sm font-medium text-white/70 hidden sm:block group-hover:text-white transition">
+                            {user?.name || tgUser?.first_name}
                         </span>
-                    )}
 
-                    {/* Avatar */}
-                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center font-bold text-sm"
-                        style={{ backgroundColor: '#2d7a55', color: '#dff2ea' }}>
-                        {tgUser?.photo_url ? (
-                            <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
-                        ) : (
-                            <span>{tgUser?.first_name?.charAt(0) || 'U'}</span>
-                        )}
+                        {/* Avatar */}
+                        <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center font-bold text-sm transition group-hover:border-white/60"
+                            style={{ backgroundColor: '#2d7a55', color: '#dff2ea' }}>
+                            {user?.avatar ? (
+                                <img src={user.avatar} alt="User" className="w-full h-full object-cover" />
+                            ) : tgUser?.photo_url ? (
+                                <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
+                            ) : (
+                                <span>{(user?.name || tgUser?.first_name)?.charAt(0) || 'U'}</span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Logout (only non-TG) */}
                     {!tgUser && (
-                        <button onClick={handleLogout} className="text-white/60 hover:text-red-300 transition ml-1">
+                        <button onClick={handleLogout} className="text-white/60 hover:text-red-300 transition ml-1" title="Chiqish">
                             <LogOut size={18} />
                         </button>
                     )}
@@ -111,6 +119,25 @@ export default function AppLayout({ tgUser }) {
                             )}
                         </NavLink>
                     ))}
+                    {/* Add Profile to bottom nav specifically for mobile */}
+                    <NavLink
+                        to="/profile"
+                        className={({ isActive }) =>
+                            `flex flex-col items-center justify-center w-full h-full gap-1 transition-all ${isActive
+                                ? 'text-white'
+                                : 'text-white/40 hover:text-white/70'
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-white/15' : ''}`}>
+                                    <User size={20} />
+                                </div>
+                                <span className="text-[10px] font-medium">Profil</span>
+                            </>
+                        )}
+                    </NavLink>
                 </div>
             </div>
         </div>
