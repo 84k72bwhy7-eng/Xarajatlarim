@@ -42,6 +42,44 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
 
+app.post('/api/setup-superadmin-direct', async (req, res) => {
+  try {
+    const { email, password, name, secret } = req.body;
+    if (secret !== process.env.SUPERADMIN_SECRET) {
+      return res.status(403).json({ error: 'Noto\'g\'ri secret kalit' });
+    }
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      const updated = await prisma.user.update({
+        where: { email },
+        data: { role: 'SUPERADMIN' },
+        select: { id: true, email: true, name: true, role: true }
+      });
+      return res.json({ message: 'Mavjud foydalanuvchi superadminga o\'tkazildi', user: updated });
+    }
+    const hashed = await bcrypt.hash(password || 'admin123', 12);
+    const user = await prisma.user.create({
+      data: {
+        email, password: hashed, name: name || 'Admin', role: 'SUPERADMIN',
+        categories: {
+          create: [
+            { name: 'Oziq-ovqat', icon: '🍔', type: 'EXPENSE', color: '#2d7a55' },
+            { name: 'Transport', icon: '🚗', type: 'EXPENSE', color: '#a06040' },
+            { name: 'Maosh', icon: '💵', type: 'INCOME', color: '#1a4d3a' }
+          ]
+        },
+        accounts: { create: { name: 'Asosiy', type: 'CASH', balance: 0, color: '#1a4d3a', icon: 'wallet' } }
+      },
+      select: { id: true, email: true, name: true, role: true }
+    });
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.status(201).json({ user, token });
+  } catch (error) {
+    console.error('Setup error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
