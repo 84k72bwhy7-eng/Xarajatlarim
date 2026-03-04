@@ -493,7 +493,7 @@ export default function ProfilePage() {
                                                 ? type === 'EXPENSE'
                                                     ? 'bg-[#a06040] border-[#a06040] text-white shadow-lg shadow-[#7d4e31]/20'
                                                     : 'bg-[#2d7a55] border-[#2d7a55] text-white shadow-lg shadow-[#1a4d3a]/20'
-                                                : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 hover:bg-slate-50'
+                                                : 'bg-[#f0faf5] border-[#dff2ea] text-[#7d4e31] hover:bg-[#e0f0e8]'
                                                 }`}
                                         >
                                             {type === 'EXPENSE' ? 'Chiqim' : 'Kirim'}
@@ -512,7 +512,7 @@ export default function ProfilePage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-[1.5] py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95"
+                                    className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95"
                                     style={{ background: 'linear-gradient(135deg, #1a4d3a, #2d7a55)', boxShadow: '0 4px 12px rgba(26,77,58,0.3)' }}
                                 >
                                     Saqlash
@@ -561,7 +561,7 @@ export default function ProfilePage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-[1.5] py-3 px-6 bg-forest-700 text-white rounded-xl font-bold shadow-lg shadow-forest-100 hover:bg-forest-800 transition-all active:scale-95"
+                                    className="flex-1 py-3 px-6 bg-forest-700 text-white rounded-xl font-bold shadow-lg shadow-forest-100 hover:bg-forest-800 transition-all active:scale-95"
                                 >
                                     Saqlash
                                 </button>
