@@ -153,10 +153,11 @@ export default function DebtsPage() {
                         { id: 'TAKEN', label: t('debts.took') },
                     ].map(f => (
                         <button key={f.id} onClick={() => setFilter(f.id)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${filter === f.id
-                                ? 'bg-forest-600 text-white shadow-lg'
-                                : 'bg-white text-forest-600 border border-forest-100 hover:bg-forest-50'
-                                }`}
+                            className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-all"
+                            style={filter === f.id
+                                ? { backgroundColor: '#7d4e31', color: '#fff', boxShadow: '0 4px 12px rgba(125,78,49,0.3)' }
+                                : { backgroundColor: '#fff', color: '#7d4e31', border: '1.5px solid #7d4e31' }
+                            }
                         >{f.label}</button>
                     ))}
                 </div>
