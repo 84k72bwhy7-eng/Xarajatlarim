@@ -20,8 +20,15 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
 
     useEffect(() => {
         if (isOpen) {
-            getCategories().then(r => setCategories(r.data)).catch(() => { });
-            getAccounts().then(r => setAccounts(r.data)).catch(() => { });
+            getCategories().then(r => setCategories(r.data || [])).catch(() => { });
+            getAccounts().then(r => {
+                const accs = r.data || [];
+                setAccounts(accs);
+                // Birinchi hisobni avtomatik tanlash
+                if (accs.length > 0) {
+                    setForm(prev => ({ ...prev, account: accs[0].id }));
+                }
+            }).catch(() => { });
         }
     }, [isOpen]);
 
@@ -37,11 +44,17 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
         }
         setLoading(true);
         try {
+            // Hisob tanlanmagan bo'lsa xato
+            if (!form.account) {
+                alert('Hisob tanlanmagan!');
+                setLoading(false);
+                return;
+            }
             await createTransaction({
                 type: form.type,
                 amount: parseFloat(form.amount),
-                categoryId: form.category ? parseInt(form.category) : undefined,
-                accountId: form.account ? parseInt(form.account) : undefined,
+                categoryId: form.category || undefined,
+                accountId: form.account, // String ID (Prisma cuid)
                 date: new Date(form.date).toISOString(),
                 description: form.description || undefined,
             });

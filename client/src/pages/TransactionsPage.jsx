@@ -17,9 +17,11 @@ export default function TransactionsPage() {
         setLoading(true);
         try {
             const res = await getTransactions();
-            setTransactions(res.data);
+            // Backend { transactions: [...], pagination: {} formatida qaytaradi
+            setTransactions(res.data?.transactions || res.data || []);
         } catch (err) {
-            console.error(err);
+            console.error('Transactions fetch error:', err);
+            setTransactions([]);
         } finally {
             setLoading(false);
         }
