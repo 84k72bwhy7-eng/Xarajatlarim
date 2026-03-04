@@ -112,17 +112,42 @@ export default function ProfilePage() {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64 = reader.result;
-                setProfileForm(prev => ({ ...prev, avatar: base64 }));
-                // Optionally auto-save avatar
-                try {
-                    await updateProfile({ ...profileForm, avatar: base64 });
-                    alert('Rasm saqlandi!');
-                    window.location.reload();
-                } catch (err) {
-                    alert('Rasmni saqlashda xato');
-                }
+            reader.onloadend = () => {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 400;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                    setProfileForm(prev => ({ ...prev, avatar: base64 }));
+                    try {
+                        await updateProfile({ ...profileForm, avatar: base64 });
+                        alert('Rasm muvaffaqiyatli saqlandi!');
+                    } catch (err) {
+                        console.error('Avatar error:', err);
+                        alert('Rasmni saqlashda tarmoq xatosi yuz berdi');
+                    }
+                };
             };
             reader.readAsDataURL(file);
         }
