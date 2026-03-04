@@ -90,6 +90,40 @@ export default function AppLayout({ tgUser, user }) {
             {/* Decorative top border stripe */}
             <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #7d4e31, #2d7a55, #f5e6d0, #2d7a55, #7d4e31)' }} />
 
+            {/* Desktop Navigation */}
+            <div className="hidden sm:block border-b border-forest-100 bg-white/80 backdrop-blur-sm">
+                <div className="max-w-4xl mx-auto px-4 flex items-center gap-1">
+                    {navItems.map((item) => (
+                        <NavLink
+                            key={item.to}
+                            to={item.to}
+                            end={item.to === '/'}
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 ${isActive
+                                    ? 'text-forest-700 border-forest-600'
+                                    : 'text-slate-400 border-transparent hover:text-forest-600'
+                                }`
+                            }
+                        >
+                            <item.icon size={16} />
+                            {item.label}
+                        </NavLink>
+                    ))}
+                    <NavLink
+                        to="/profile"
+                        className={({ isActive }) =>
+                            `flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 ml-auto ${isActive
+                                ? 'text-forest-700 border-forest-600'
+                                : 'text-slate-400 border-transparent hover:text-forest-600'
+                            }`
+                        }
+                    >
+                        <User size={16} />
+                        Profil
+                    </NavLink>
+                </div>
+            </div>
+
             {/* Main Content */}
             <main className="max-w-4xl mx-auto py-6 px-4">
                 <Outlet />
