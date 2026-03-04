@@ -37,7 +37,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/admin-setup', createSuperAdminRoute);
+app.use('/api/setup-superadmin', createSuperAdminRoute);
 
 // Health check
 app.get('/api/health', (req, res) => {
