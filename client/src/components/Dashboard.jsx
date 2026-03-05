@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Plus, Wallet, HandCoins, Target, Trash2, Leaf
+    Plus, Wallet, HandCoins, Target, Trash2, Leaf,
+    Activity, ArrowUpRight, ArrowDownLeft, ChevronRight
 } from 'lucide-react';
+import CashflowChart from './CashflowChart';
+import CategoryPieChart from './CategoryPieChart';
+import SafeToSpend from './SafeToSpend';
 import AddTransactionModal from './AddTransactionModal';
 import { getDashboardSummary, getDebts, getGoals, createCategory, updateCategory, deleteCategory } from '../lib/api';
 
@@ -233,6 +237,69 @@ export default function Dashboard({ tgUser }) {
                                 <Plus size={24} strokeWidth={3} />
                             </div>
                             <span className="text-sm font-bold text-slate-500 group-hover:text-earth-600 transition-colors">Qo'shish</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3) ANALYTICS & RECENT TRANSACTIONS */}
+                <div className="pt-6 border-t border-forest-100/50 mt-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 space-y-6">
+                            <CashflowChart data={d.cashflow} />
+
+                            {/* Recent Transactions */}
+                            <div className="rounded-2xl p-6" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
+                                <div className="flex justify-between items-center mb-5">
+                                    <h3 className="text-base font-bold flex items-center gap-2" style={{ color: '#1a4d3a' }}>
+                                        <span className="w-2 h-6 rounded-full inline-block" style={{ backgroundColor: '#1a4d3a' }}></span>
+                                        {t('dashboard.recentTransactions')}
+                                    </h3>
+                                    <a href="/transactions" className="text-sm font-medium hover:opacity-70 transition" style={{ color: '#2d7a55' }}>
+                                        {t('dashboard.viewAll')}
+                                    </a>
+                                </div>
+
+                                {d.recentTransactions?.length === 0 ? (
+                                    <div className="py-10 text-center">
+                                        <Activity size={36} className="mx-auto mb-3 opacity-20" style={{ color: '#1a4d3a' }} />
+                                        <p className="text-sm" style={{ color: '#7d4e31' }}>{t('dashboard.noTransactions')}</p>
+                                        <button onClick={() => setShowTxModal(true)} className="mt-3 text-sm font-medium hover:opacity-70" style={{ color: '#2d7a55' }}>
+                                            + {t('transactions.addTransaction')}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y" style={{ borderColor: '#f0faf5' }}>
+                                        {d.recentTransactions?.map((tx) => (
+                                            <div key={tx.id} className="py-3 flex items-center justify-between hover:bg-[#f0faf5] rounded-xl px-2 -mx-2 transition">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg"
+                                                        style={{ backgroundColor: `${tx.category?.color || '#2d7a55'}18` }}>
+                                                        {tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸')}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{tx.description || tx.category?.name || '-'}</p>
+                                                        <p className="text-xs" style={{ color: '#7d4e31' }}>{tx.category?.name}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className={`text-sm font-bold`} style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
+                                                        {tx.type === 'INCOME' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
+                                                    </p>
+                                                    <p className="text-xs" style={{ color: '#a06040' }}>{new Date(tx.date).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Right column */}
+                        <div className="space-y-6">
+                            {d.safeToSpend && <SafeToSpend data={d.safeToSpend} />}
+                            {d.categoryBreakdown?.length > 0 && (
+                                <CategoryPieChart data={d.categoryBreakdown.map(c => ({ ...c, total: c.spentAmount }))} />
+                            )}
                         </div>
                     </div>
                 </div>
