@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv() # .env
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-VERSION = "v1.0.6"
+VERSION = "v1.0.7"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,16 +37,24 @@ async def start_handler(message: Message):
     user = await db.get_user_by_tg_id(pool, message.from_user.id)
 
     if not user:
+        tg_id = message.from_user.id
         welcome_text = (
             f"👋 Salom, <b>{message.from_user.first_name}</b>!\n\n"
             "💰 <b>Xarajatlarim</b> botiga xush kelibsiz!\n\n"
-            f"Iltimos, avval Mini App orqali ro'yxatdan o'ting. ({VERSION})"
+            "Botdan to'g'ridan-to'g'ri foydalanish uchun hisobingizni bog'lash kerak.\n\n"
+            "📝 <b>Nima qilish kerak?</b>\n"
+            "1. Pastdagi tugma orqali <b>Mini App</b> ga kiring.\n"
+            "2. Kirishingiz bilan hisobingiz avtomat bog'lanadi.\n"
+            "3. Keyin botda xarajat kiritishni boshlashingiz mumkin.\n\n"
+            f"🆔 Sizning ID: <code>{tg_id}</code>\n"
+            f"⚙️ Versiya: {VERSION}"
         )
         await message.answer(
             welcome_text, 
             parse_mode="HTML", 
-            reply_markup=await get_main_keyboard(pool) # Bu yerda faqat "Ilovani ochish" chiqadi va eskilarini o'chiradi
+            reply_markup=await get_main_keyboard(pool)
         )
+        logger.info(f"Unrecognized user: {tg_id}")
         return
 
     welcome_text = (

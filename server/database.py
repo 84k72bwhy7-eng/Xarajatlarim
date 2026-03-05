@@ -16,8 +16,12 @@ async def get_db_pool():
     return await asyncpg.create_pool(db_url)
 
 async def get_user_by_tg_id(pool, telegram_id):
+    if not pool:
+        return None
     async with pool.acquire() as conn:
-        return await conn.fetchrow("SELECT * FROM users WHERE \"telegramId\" = $1", str(telegram_id))
+        # Prisma name is "telegramId", mapped to "users" table
+        user = await conn.fetchrow("SELECT * FROM users WHERE \"telegramId\" = $1", str(telegram_id))
+        return user
 
 async def get_user_categories(pool, user_id):
     async with pool.acquire() as conn:
