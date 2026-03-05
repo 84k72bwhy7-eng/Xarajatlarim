@@ -31,10 +31,12 @@ export default function AppLayout({ tgUser, user }) {
         navItems.push({ to: '/admin', icon: Shield, label: 'Admin' });
     }
 
+    const isTwa = !!tgUser; // Telegram Mini App flag
+
     return (
         <div className="min-h-screen pb-20 sm:pb-0" style={{ backgroundColor: '#f0f5f2' }}>
             {/* Top Navbar */}
-            <nav className="sticky top-0 z-30 px-4 py-3 flex items-center justify-between"
+            <nav className={`sticky top-0 z-30 px-4 py-3 flex items-center ${isTwa ? 'justify-center' : 'justify-between'}`}
                 style={{
                     backgroundColor: '#1a4d3a',
                     boxShadow: '0 2px 12px rgba(26, 77, 58, 0.4)',
@@ -54,43 +56,45 @@ export default function AppLayout({ tgUser, user }) {
                 </div>
 
                 {/* Right controls */}
-                <div className="flex items-center gap-2">
-                    {/* Language toggle */}
-                    <button
-                        onClick={toggleLanguage}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 border border-white/20 transition"
-                    >
-                        <Globe size={13} />
-                        {i18n.language.toUpperCase()}
-                    </button>
-
-                    {/* User display */}
-                    <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/profile')}>
-                        {/* User name */}
-                        <span className="text-sm font-medium text-white/70 hidden sm:block group-hover:text-white transition">
-                            {user?.name || tgUser?.first_name}
-                        </span>
-
-                        {/* Avatar */}
-                        <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center font-bold text-sm transition group-hover:border-white/60"
-                            style={{ backgroundColor: '#2d7a55', color: '#dff2ea' }}>
-                            {user?.avatar ? (
-                                <img src={user.avatar} alt="User" className="w-full h-full object-cover" />
-                            ) : tgUser?.photo_url ? (
-                                <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
-                            ) : (
-                                <span>{(user?.name || tgUser?.first_name)?.charAt(0) || 'U'}</span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Logout (only non-TG) */}
-                    {!tgUser && (
-                        <button onClick={handleLogout} className="text-white/60 hover:text-red-300 transition ml-1" title="Chiqish">
-                            <LogOut size={18} />
+                {!isTwa && (
+                    <div className="flex items-center gap-2">
+                        {/* Language toggle */}
+                        <button
+                            onClick={toggleLanguage}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 border border-white/20 transition"
+                        >
+                            <Globe size={13} />
+                            {i18n.language.toUpperCase()}
                         </button>
-                    )}
-                </div>
+
+                        {/* User display */}
+                        <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/profile')}>
+                            {/* User name */}
+                            <span className="text-sm font-medium text-white/70 hidden sm:block group-hover:text-white transition">
+                                {user?.name || tgUser?.first_name}
+                            </span>
+
+                            {/* Avatar */}
+                            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center font-bold text-sm transition group-hover:border-white/60"
+                                style={{ backgroundColor: '#2d7a55', color: '#dff2ea' }}>
+                                {user?.avatar ? (
+                                    <img src={user.avatar} alt="User" className="w-full h-full object-cover" />
+                                ) : tgUser?.photo_url ? (
+                                    <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span>{(user?.name || tgUser?.first_name)?.charAt(0) || 'U'}</span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Logout (only non-TG) */}
+                        {!tgUser && (
+                            <button onClick={handleLogout} className="text-white/60 hover:text-red-300 transition ml-1" title="Chiqish">
+                                <LogOut size={18} />
+                            </button>
+                        )}
+                    </div>
+                )}
             </nav>
 
             {/* Decorative top border stripe */}
@@ -131,7 +135,25 @@ export default function AppLayout({ tgUser, user }) {
             </div>
 
             {/* Main Content */}
-            <main className="max-w-4xl mx-auto py-6 px-4">
+            <main className="max-w-4xl mx-auto py-6 px-4 relative">
+                {isTwa && (
+                    <div className="absolute top-6 right-4 flex items-center gap-2 z-10">
+                        <button
+                            onClick={toggleLanguage}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-forest-700 bg-white shadow-sm border border-forest-100 transition"
+                        >
+                            <Globe size={13} />
+                            {i18n.language.toUpperCase()}
+                        </button>
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-forest-200 flex items-center justify-center font-bold text-sm bg-forest-50 text-forest-700 shadow-sm cursor-pointer" onClick={() => navigate('/profile')}>
+                            {tgUser?.photo_url ? (
+                                <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
+                            ) : (
+                                <span>{tgUser?.first_name?.charAt(0) || 'U'}</span>
+                            )}
+                        </div>
+                    </div>
+                )}
                 <Outlet />
             </main>
 
