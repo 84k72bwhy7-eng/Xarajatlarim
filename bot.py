@@ -50,6 +50,7 @@ async def start_handler(message: Message):
 
     welcome_text = (
         f"👋 Salom, <b>{user['name']}</b>!\n\n"
+        "🔥 <b>Bot yangilandi!</b> (v1.0.4)\n\n"
         "Xarajatlarni kiritish uchun pastdagi kategoriyalardan birini tanlang yoki Mini App ga kiring!"
     )
 
