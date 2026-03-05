@@ -115,4 +115,8 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #1a4d3a;
   }
+
+  .touch-none {
+    touch-action: none;
+  }
 }

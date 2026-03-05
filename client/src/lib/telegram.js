@@ -4,6 +4,13 @@ export function initializeTelegramApp() {
     if (typeof window !== 'undefined') {
         WebApp.ready();
         WebApp.expand();
+        try {
+            if (WebApp.disableVerticalSwipes) {
+                WebApp.disableVerticalSwipes();
+            }
+        } catch (e) {
+            console.error('Disable vertical swipes failed:', e);
+        }
 
         try {
             if (WebApp.requestFullscreen) {
