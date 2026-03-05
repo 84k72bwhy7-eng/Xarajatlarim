@@ -8,6 +8,8 @@ export function initializeTelegramApp() {
         try {
             if (WebApp.requestFullscreen) {
                 WebApp.requestFullscreen();
+            } else if (window.Telegram?.WebApp?.postEvent) {
+                window.Telegram.WebApp.postEvent('web_app_request_fullscreen');
             }
         } catch (e) {
             console.error('Fullscreen request failed:', e);
