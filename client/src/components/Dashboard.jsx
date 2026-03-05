@@ -103,7 +103,7 @@ export default function Dashboard({ tgUser }) {
     // Goals Calculation
     const activeGoals = goalData.goals?.filter(g => !g.isCompleted) || [];
     const totalGoalTarget = activeGoals.reduce((sum, g) => sum + Number(g.targetAmount), 0);
-    const totalGoalCollected = activeGoals.reduce((sum, g) => sum + Number(g.currentAmount), 0);
+    const totalGoalCollected = activeGoals.reduce((sum, g) => sum + Number(g.savedAmount || 0), 0);
 
     return (
         <>
