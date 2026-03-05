@@ -22,13 +22,7 @@ dp = Dispatcher(storage=MemoryStorage())
 dp.include_router(expense_router)
 dp.include_router(settings_router)
 
-def get_webapp_keyboard():
-    from aiogram.utils.keyboard import ReplyKeyboardBuilder
-    from aiogram.types import WebAppInfo
-    builder = ReplyKeyboardBuilder()
-    WEBAPP_URL = "https://frontend-production-a930.up.railway.app" 
-    builder.button(text="🚀 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
-    return builder.as_markup(resize_keyboard=True)
+
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
@@ -52,8 +46,7 @@ async def start_handler(message: Message):
 
     await message.answer(
         welcome_text,
-        parse_mode="HTML",
-        reply_markup=get_webapp_keyboard()
+        parse_mode="HTML"
     )
 
 
