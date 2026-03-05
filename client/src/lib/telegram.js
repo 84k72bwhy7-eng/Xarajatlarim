@@ -13,6 +13,13 @@ export function initializeTelegramApp() {
             console.error('Fullscreen request failed:', e);
         }
 
+        try {
+            WebApp.setHeaderColor('#1a4d3a'); // Forest Green var
+            WebApp.setBackgroundColor('#f0f5f2'); // Main bg
+        } catch (e) {
+            console.error('Color set failed:', e);
+        }
+
         // Theme colors synchronization
         const applyTheme = () => {
             document.body.style.backgroundColor = WebApp.backgroundColor || '#f8fafc';
