@@ -40,14 +40,13 @@ async def start_handler(message: Message):
         welcome_text = (
             f"👋 Salom, <b>{message.from_user.first_name}</b>!\n\n"
             "💰 <b>Xarajatlarim</b> botiga xush kelibsiz!\n\n"
-            "Iltimos, avval Mini App orqali ro'yxatdan o'ting."
+            f"Iltimos, avval Mini App orqali ro'yxatdan o'ting. ({VERSION})"
         )
-        WEBAPP_URL = "https://frontend-production-a930.up.railway.app"
-        from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-        kb = InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="🚀 Mini Appni ochish", web_app=WebAppInfo(url=WEBAPP_URL))
-        ]])
-        await message.answer(welcome_text, parse_mode="HTML", reply_markup=kb)
+        await message.answer(
+            welcome_text, 
+            parse_mode="HTML", 
+            reply_markup=await get_main_keyboard(pool) # Bu yerda faqat "Ilovani ochish" chiqadi va eskilarini o'chiradi
+        )
         return
 
     welcome_text = (

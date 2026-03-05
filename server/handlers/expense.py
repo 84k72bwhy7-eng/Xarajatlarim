@@ -17,16 +17,16 @@ def format_amount(amount):
     """Summani formatlash"""
     return f"{amount:,.0f}".replace(",", " ")
 
-async def get_main_keyboard(pool, user_id):
-    """Asosiy klaviatura: Kategoriyalar tugmalar ko'rinishida"""
+async def get_main_keyboard(pool=None, user_id=None):
+    """Asosiy klaviatura: Mini App tugmasi va (agar bo'lsa) Kategoriyalar"""
     builder = ReplyKeyboardBuilder()
     
-    # 1. Mini App tugmasi
+    # 1. Mini App tugmasi (Hamma uchun)
     WEBAPP_URL = "https://frontend-production-a930.up.railway.app" 
     builder.button(text="🚀 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
     
-    # 2. Foydalanuvchi kategoriyalari
-    if pool:
+    # 2. Foydalanuvchi kategoriyalari (Faqat ro'yxatdan o'tganlar uchun)
+    if pool and user_id:
         try:
             categories = await db.get_user_categories(pool, user_id)
             for cat in categories:
@@ -35,7 +35,12 @@ async def get_main_keyboard(pool, user_id):
         except Exception as e:
             print(f"Error fetching categories: {e}")
     
-    builder.adjust(1, 2)
+    # Tugmalarni joylashtirish
+    if user_id:
+        builder.adjust(1, 3) # Birinchi qatorda Mini App, keyin 3 tadan kategoriyalar
+    else:
+        builder.adjust(1)
+        
     return builder.as_markup(resize_keyboard=True)
 
 @router.message(F.text.regexp(r'^[\U00010000-\U0010ffff] .+$'))
