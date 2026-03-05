@@ -10,8 +10,11 @@ import database as db
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv() # .env
+load_dotenv("server/.env") # server/.env as fallback/override
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+VERSION = "v1.0.5"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,7 +53,7 @@ async def start_handler(message: Message):
 
     welcome_text = (
         f"👋 Salom, <b>{user['name']}</b>!\n\n"
-        "🔥 <b>Bot yangilandi!</b> (v1.0.4)\n\n"
+        f"🔥 <b>Bot yangilandi!</b> ({VERSION})\n\n"
         "Xarajatlarni kiritish uchun pastdagi kategoriyalardan birini tanlang yoki Mini App ga kiring!"
     )
 
@@ -104,23 +107,12 @@ async def main():
     logger.info("🤖 Bot ishga tushmoqda...")
     
     # DB Pool yaratish
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        logger.error("❌ DATABASE_URL topilmadi! .env faylini tekshiring.")
-        # Ehtimol server/.env dan olishga harakat qilamiz
-        load_dotenv("server/.env")
-        db_url = os.getenv("DATABASE_URL")
-    
-    if not db_url:
-        logger.error("❌ DATABASE_URL hali ham yo'q. Bot to'liq ishlamasligi mumkin.")
+    try:
+        bot.pool = await db.get_db_pool()
+        logger.info("✅ PostgreSQL bog'lanishi o'rnatildi")
+    except Exception as e:
+        logger.error(f"❌ DB ga ulanishda xato: {e}")
         bot.pool = None
-    else:
-        try:
-            bot.pool = await db.get_db_pool()
-            logger.info("✅ PostgreSQL bog'lanishi o'rnatildi")
-        except Exception as e:
-            logger.error(f"❌ DB ga ulanishda xato: {e}")
-            bot.pool = None
     
     # Bot UI ni sozlash
     await setup_bot_ui()

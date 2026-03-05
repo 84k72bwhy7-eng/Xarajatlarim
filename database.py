@@ -2,12 +2,18 @@ import asyncpg
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-
 async def get_db_pool():
-    return await asyncpg.create_pool(DATABASE_URL)
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        # Fallback to server/.env if not in environment
+        from dotenv import load_dotenv
+        load_dotenv("server/.env")
+        db_url = os.getenv("DATABASE_URL")
+    
+    if not db_url:
+        raise ValueError("DATABASE_URL environment variable is not set")
+        
+    return await asyncpg.create_pool(db_url)
 
 async def get_user_by_tg_id(pool, telegram_id):
     async with pool.acquire() as conn:
