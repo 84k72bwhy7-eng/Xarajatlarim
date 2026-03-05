@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import Message, BotCommand, WebAppInfo, MenuButtonWebApp
 from aiogram.filters import CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
-from apscheduler.schedulers.asyncio import AsyncioScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from handlers.expense import router as expense_router, get_main_keyboard
 import database as db
 import os
