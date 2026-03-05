@@ -122,56 +122,47 @@ export default function Dashboard({ tgUser }) {
                 </div>
 
                 {/* 1) TOP 4 BLOCKS GRID */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-2 sm:gap-4">
                     {/* 1. Add Transaction */}
                     <button
                         onClick={() => setShowTxModal(true)}
-                        className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white"
-                        style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 8px 24px rgba(26,77,58,0.3)' }}
+                        className="rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white"
+                        style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 4px 12px rgba(26,77,58,0.2)' }}
                     >
-                        <Plus size={36} strokeWidth={2.5} />
-                        <span className="font-bold text-sm tracking-wide text-center leading-tight">{t('transactions.addTransaction')}</span>
+                        <Plus size={24} className="sm:w-9 sm:h-9" strokeWidth={2.5} />
+                        <span className="font-bold text-[9px] sm:text-sm tracking-wide text-center leading-tight truncate w-full">{t('transactions.addTransaction')}</span>
                     </button>
 
                     {/* 2. Balance */}
-                    <div className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition" style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">{t('dashboard.balance')}</span>
-                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-forest-600 bg-forest-50">
-                                <Wallet size={16} />
-                            </div>
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-forest-600 bg-forest-50 mb-1 sm:mb-2">
+                            <Wallet size={14} className="sm:w-4 sm:h-4" />
                         </div>
-                        <h3 className="text-2xl font-black text-forest-900">${d.netWorth.toLocaleString()}</h3>
+                        <h3 className="text-sm sm:text-2xl font-black text-forest-900 truncate w-full">${d.netWorth.toLocaleString()}</h3>
+                        <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">{t('dashboard.balance')}</span>
                     </div>
 
                     {/* 3. Debts */}
-                    <a href="/debts" className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition block" style={{ boxShadow: '0 4px 16px rgba(125,78,49,0.08)' }}>
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">{t('debts.title')}</span>
-                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-red-500 bg-red-50">
-                                <HandCoins size={16} />
-                            </div>
+                    <a href="/debts" className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition block" style={{ boxShadow: '0 4px 12px rgba(125,78,49,0.06)' }}>
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-red-500 bg-red-50 mb-1 sm:mb-2">
+                            <HandCoins size={14} className="sm:w-4 sm:h-4" />
                         </div>
-                        <div className="space-y-0.5">
-                            <p className="text-red-500 font-bold text-xs sm:text-sm">{t('debts.iGave')}: ${Number(debtData.stats?.totalGivenRemaining || 0).toLocaleString()}</p>
-                            <p className="text-forest-600 font-bold text-xs sm:text-sm">{t('debts.iTook')}: ${Number(debtData.stats?.totalTakenRemaining || 0).toLocaleString()}</p>
+                        <div className="flex flex-col items-center w-full">
+                            <p className="text-[10px] sm:text-sm text-red-500 font-bold truncate w-full">-${Number(debtData.stats?.totalGivenRemaining || 0).toLocaleString()}</p>
+                            <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('debts.title')}</span>
                         </div>
                     </a>
 
                     {/* 4. Goals */}
-                    <a href="/goals" className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition block" style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">{t('goals.title')}</span>
-                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-amber-500 bg-amber-50">
-                                <Target size={16} />
-                            </div>
+                    <a href="/goals" className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition block" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-amber-500 bg-amber-50 mb-1 sm:mb-2">
+                            <Target size={14} className="sm:w-4 sm:h-4" />
                         </div>
-                        <div>
-                            <p className="text-2xl font-black text-forest-900 flex items-baseline gap-1">
+                        <div className="flex flex-col items-center w-full">
+                            <p className="text-[10px] sm:text-sm font-black text-forest-900 truncate w-full">
                                 ${totalGoalCollected.toLocaleString()}
-                                <span className="text-sm font-semibold text-slate-400">/ ${totalGoalTarget.toLocaleString()}</span>
                             </p>
-                            <p className="text-xs font-semibold text-slate-400 mt-0.5">{t('goals.collected')} / {t('goals.target')}</p>
+                            <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('goals.title')}</span>
                         </div>
                     </a>
                 </div>
@@ -182,7 +173,7 @@ export default function Dashboard({ tgUser }) {
                         <span className="w-1.5 h-5 rounded-full" style={{ backgroundColor: '#7d4e31' }}></span>
                         {t('dashboard.categoriesAndLimits')}
                     </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                         {d.categoryBreakdown.map(cat => {
                             if (cat.id === 'other') return null;
 
@@ -208,11 +199,11 @@ export default function Dashboard({ tgUser }) {
                                     <h4 className="font-bold text-forest-900 leading-tight mb-2 truncate text-sm sm:text-base">{cat.name}</h4>
 
                                     {/* Amount Details */}
-                                    <div className="flex items-end justify-between font-medium text-xs mb-2">
-                                        <span className={`font-bold text-sm ${isOver ? 'text-red-500' : 'text-forest-700'}`}>
+                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between font-medium text-[10px] sm:text-xs mb-1 sm:mb-2">
+                                        <span className={`font-bold text-xs sm:text-sm truncate w-full ${isOver ? 'text-red-500' : 'text-forest-700'}`}>
                                             ${spent.toLocaleString()}
                                         </span>
-                                        <span className="text-slate-400">/ ${limit > 0 ? limit.toLocaleString() : '∞'}</span>
+                                        <span className="text-slate-400 text-[9px] sm:text-xs">/ ${limit > 0 ? limit.toLocaleString() : '∞'}</span>
                                     </div>
 
                                     {/* Progress Bar */}
