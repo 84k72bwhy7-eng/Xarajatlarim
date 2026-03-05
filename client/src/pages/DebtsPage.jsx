@@ -5,6 +5,7 @@ import {
     ArrowUpRight, ArrowDownLeft, CheckCircle2, Clock, Banknote, X
 } from 'lucide-react';
 import { getDebts, createDebt, updateDebt, payDebt, deleteDebt } from '../lib/api';
+import { formatCurrency } from '../lib/format';
 
 export default function DebtsPage() {
     const { t } = useTranslation();
@@ -103,7 +104,6 @@ export default function DebtsPage() {
         return true;
     });
 
-    const formatNumber = (n) => Number(n || 0).toLocaleString('uz-UZ');
     const getProgress = (d) => d.amount > 0 ? Math.min(Math.round((d.paidAmount / d.amount) * 100), 100) : 0;
 
     if (loading) {
@@ -130,16 +130,16 @@ export default function DebtsPage() {
                             <ArrowUpRight size={16} className="text-red-300" />
                             <span className="text-xs text-white/60">{t('debts.iGave')}</span>
                         </div>
-                        <p className="text-xl font-bold">{formatNumber(stats.totalGivenRemaining)}</p>
-                        <p className="text-xs text-white/50">{t('debts.total')}: {formatNumber(stats.totalGiven)}</p>
+                        <p className="text-xl font-bold">{formatCurrency(stats.totalGivenRemaining)}</p>
+                        <p className="text-xs text-white/50">{t('debts.total')}: {formatCurrency(stats.totalGiven)}</p>
                     </div>
                     <div className="bg-white/10 rounded-xl p-4 border border-white/10">
                         <div className="flex items-center gap-2 mb-1">
                             <ArrowDownLeft size={16} className="text-green-300" />
                             <span className="text-xs text-white/60">{t('debts.iTook')}</span>
                         </div>
-                        <p className="text-xl font-bold">{formatNumber(stats.totalTakenRemaining)}</p>
-                        <p className="text-xs text-white/50">{t('debts.total')}: {formatNumber(stats.totalTaken)}</p>
+                        <p className="text-xl font-bold">{formatCurrency(stats.totalTakenRemaining)}</p>
+                        <p className="text-xs text-white/50">{t('debts.total')}: {formatCurrency(stats.totalTaken)}</p>
                     </div>
                 </div>
             </div>
@@ -207,9 +207,9 @@ export default function DebtsPage() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-bold text-forest-900 text-lg">{formatNumber(debt.amount)}</p>
+                                        <p className="font-bold text-forest-900 text-lg">{formatCurrency(debt.amount)}</p>
                                         {debt.paidAmount > 0 && (
-                                            <p className="text-xs text-green-600">-{formatNumber(debt.paidAmount)} {t('debts.returned')}</p>
+                                            <p className="text-xs text-green-600">-{formatCurrency(debt.paidAmount)} {t('debts.returned')}</p>
                                         )}
                                     </div>
                                 </div>
@@ -218,7 +218,7 @@ export default function DebtsPage() {
                                 <div className="mb-3">
                                     <div className="flex justify-between text-xs text-slate-400 mb-1">
                                         <span>{progress}% {t('debts.returned')}</span>
-                                        <span>{t('debts.remaining')}: {formatNumber(debt.amount - debt.paidAmount)}</span>
+                                        <span>{t('debts.remaining')}: {formatCurrency(debt.amount - debt.paidAmount)}</span>
                                     </div>
                                     <div className="w-full h-2 bg-forest-50 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-500"
@@ -339,7 +339,7 @@ export default function DebtsPage() {
                     <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
                         <h3 className="text-lg font-bold text-forest-900 mb-1">{t('debts.payTitle')}</h3>
                         <p className="text-sm text-slate-400 mb-4">
-                            {payingDebt.personName} — {t('debts.remaining')}: {formatNumber(payingDebt.amount - payingDebt.paidAmount)}
+                            {payingDebt.personName} — {t('debts.remaining')}: {formatCurrency(payingDebt.amount - payingDebt.paidAmount)}
                         </p>
                         <form onSubmit={handlePay} className="space-y-4">
                             <input type="number" required min="1"

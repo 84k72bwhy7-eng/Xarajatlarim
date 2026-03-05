@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { formatCurrency } from '../lib/format';
 
 const NATURE_COLORS = ['#1a4d3a', '#7d4e31', '#2d7a55', '#a06040', '#3a9669', '#bf7c55', '#52b082', '#d4987a'];
 
@@ -13,7 +14,7 @@ export default function CategoryPieChart({ data }) {
             return (
                 <div className="rounded-xl p-3 text-sm" style={{ backgroundColor: '#1a4d3a', color: 'white', boxShadow: '0 8px 20px rgba(0,0,0,0.25)' }}>
                     <p className="font-semibold">{t(`categories.${payload[0].name}`, payload[0].name)}</p>
-                    <p className="text-white/70 mt-0.5">${Number(payload[0].value).toLocaleString()}</p>
+                    <p className="text-white/70 mt-0.5">{formatCurrency(payload[0].value)}</p>
                 </div>
             );
         }
@@ -45,7 +46,7 @@ export default function CategoryPieChart({ data }) {
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-xs font-medium uppercase tracking-wider" style={{ color: '#7d4e31' }}>Jami</span>
                             <span className="text-2xl font-bold mt-0.5" style={{ color: '#1a4d3a' }}>
-                                ${data.reduce((s, i) => s + i.total, 0).toLocaleString()}
+                                {formatCurrency(data.reduce((s, i) => s + i.total, 0))}
                             </span>
                         </div>
                     </>
@@ -57,7 +58,7 @@ export default function CategoryPieChart({ data }) {
                     <div key={i} className="flex items-center gap-2 text-xs">
                         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }}></div>
                         <span className="truncate" style={{ color: '#7d4e31' }}>{t(`categories.${cat.name}`, cat.name)}</span>
-                        <span className="font-semibold ml-auto" style={{ color: '#1a4d3a' }}>${Number(cat.total).toLocaleString()}</span>
+                        <span className="font-semibold ml-auto" style={{ color: '#1a4d3a' }}>{formatCurrency(cat.total)}</span>
                     </div>
                 ))}
             </div>

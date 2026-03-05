@@ -3,6 +3,7 @@ import { Plus, Target, AlertTriangle, CheckCircle2, Leaf } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getBudgets } from '../lib/api';
 import AddBudgetModal from '../components/AddBudgetModal';
+import { formatCurrency } from '../lib/format';
 
 export default function BudgetsPage() {
     const { t } = useTranslation();
@@ -78,7 +79,7 @@ export default function BudgetsPage() {
                                             </div>
                                             <div>
                                                 <h3 className="font-bold" style={{ color: '#1a4d3a' }}>{budget.category.name}</h3>
-                                                <p className="text-xs" style={{ color: '#a06040' }}>${budget.amount} {t('budget.limit')}</p>
+                                                <p className="text-xs" style={{ color: '#a06040' }}>{formatCurrency(budget.amount)} {t('budget.limit')}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -90,10 +91,10 @@ export default function BudgetsPage() {
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-sm font-medium">
                                             <span style={{ color: isOver ? '#a06040' : '#1a4d3a' }}>
-                                                {t('budget.spent')}: ${budget.spent}
+                                                {t('budget.spent')}: {formatCurrency(budget.spent)}
                                             </span>
                                             <span style={{ color: '#7d4e31' }}>
-                                                {t('budget.remaining')}: ${Math.max(budget.amount - budget.spent, 0)}
+                                                {t('budget.remaining')}: {formatCurrency(Math.max(budget.amount - budget.spent, 0))}
                                             </span>
                                         </div>
                                         <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: '#f0faf5' }}>

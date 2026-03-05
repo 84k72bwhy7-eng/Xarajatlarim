@@ -90,6 +90,11 @@ export const updateProfile = async (data) => {
     }
     return response.data;
 };
+export const changeCurrency = async (targetCurrency) => {
+    const response = await api.put('/profile/change-currency', { targetCurrency });
+    return response.data;
+};
+export const getExchangeRate = () => api.get('/profile/exchange-rate');
 export const updatePassword = (data) => api.put('/profile/password', data);
 
 // Debts (Qarzlar)

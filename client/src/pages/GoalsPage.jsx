@@ -5,6 +5,7 @@ import {
     CheckCircle2, TrendingUp, Coins, X, Sparkles
 } from 'lucide-react';
 import { getGoals, createGoal, updateGoal, addToGoal, deleteGoal } from '../lib/api';
+import { formatCurrency } from '../lib/format';
 
 const GOAL_ICONS = ['🎯', '🏠', '🚗', '✈️', '📱', '💻', '👗', '💍', '🎓', '💰', '🏖️', '🎮', '📚', '🏋️', '🎵'];
 
@@ -99,7 +100,6 @@ export default function GoalsPage() {
     };
 
     const filteredGoals = goals.filter(g => showCompleted || !g.isCompleted);
-    const formatNumber = (n) => Number(n || 0).toLocaleString('uz-UZ');
     const getProgress = (g) => g.targetAmount > 0 ? Math.min(Math.round((g.savedAmount / g.targetAmount) * 100), 100) : 0;
 
     if (loading) {
@@ -136,8 +136,8 @@ export default function GoalsPage() {
                 </div>
                 <div className="mt-3 bg-white/10 rounded-xl p-3 border border-white/10">
                     <div className="flex justify-between text-xs text-white/60 mb-1">
-                        <span>{t('goals.collected')}: {formatNumber(stats.totalSaved)}</span>
-                        <span>{t('goals.target')}: {formatNumber(stats.totalTarget)}</span>
+                        <span>{t('goals.collected')}: {formatCurrency(stats.totalSaved)}</span>
+                        <span>{t('goals.target')}: {formatCurrency(stats.totalTarget)}</span>
                     </div>
                     <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-700"
@@ -204,14 +204,14 @@ export default function GoalsPage() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs text-slate-400">{t('goals.target')}</p>
-                                        <p className="font-bold text-forest-900">{formatNumber(goal.targetAmount)}</p>
+                                        <p className="font-bold text-forest-900">{formatCurrency(goal.targetAmount)}</p>
                                     </div>
                                 </div>
 
                                 {/* Progress bar */}
                                 <div className="mb-3">
                                     <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-forest-600 font-semibold">{formatNumber(goal.savedAmount)} {t('goals.collected').toLowerCase()}</span>
+                                        <span className="text-forest-600 font-semibold">{formatCurrency(goal.savedAmount)} {t('goals.collected').toLowerCase()}</span>
                                         <span className={`font-bold ${progress >= 100 ? 'text-green-500' : 'text-slate-400'}`}>{progress}%</span>
                                     </div>
                                     <div className="w-full h-3 bg-forest-50 rounded-full overflow-hidden">
@@ -224,7 +224,7 @@ export default function GoalsPage() {
                                             }} />
                                     </div>
                                     {!goal.isCompleted && (
-                                        <p className="text-xs text-slate-400 mt-1">{t('goals.needMore').replace('{{amount}}', formatNumber(remaining > 0 ? remaining : 0))}</p>
+                                        <p className="text-xs text-slate-400 mt-1">{t('goals.needMore').replace('{{amount}}', formatCurrency(remaining > 0 ? remaining : 0))}</p>
                                     )}
                                 </div>
 

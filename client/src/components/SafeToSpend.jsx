@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Leaf, ShieldCheck, AlertCircle } from 'lucide-react';
+import { formatCurrency } from '../lib/format';
 
 export default function SafeToSpend({ data }) {
     const { t } = useTranslation();
@@ -33,14 +34,14 @@ export default function SafeToSpend({ data }) {
                 </div>
 
                 <div className="mt-4 pb-5 mb-5 border-b border-white/20">
-                    <span className="text-4xl font-bold">${Number(safeTotal || 0).toLocaleString()}</span>
+                    <span className="text-4xl font-bold">{formatCurrency(safeTotal || 0)}</span>
                     <span className="text-white/60 ml-2 text-sm">jami</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <p className="text-white/60 text-xs mb-1">Kunlik limit</p>
-                        <p className="text-xl font-bold">${safePerDay}<span className="text-xs font-normal text-white/60 ml-1">/kun</span></p>
+                        <p className="text-xl font-bold">{formatCurrency(safePerDay)}<span className="text-xs font-normal text-white/60 ml-1">/kun</span></p>
                     </div>
                     <div>
                         <p className="text-white/60 text-xs mb-1">Qolgan kunlar</p>
@@ -55,8 +56,8 @@ export default function SafeToSpend({ data }) {
                         : <AlertCircle size={18} className="text-yellow-200 shrink-0 mt-0.5" />}
                     <p className="text-xs text-white/80 leading-relaxed">
                         {isHealthy
-                            ? `✅ Yaxshi yo'ldasiz! Kelgusi to'lovlar uchun $${Number(upcomingBills || 0).toLocaleString()} ajratildi.`
-                            : `⚠️ Diqqat! Kelgusi to'lovlar ($${Number(upcomingBills || 0).toLocaleString()}) balansingizning katta qismini egallaydi.`}
+                            ? `✅ Yaxshi yo'ldasiz! Kelgusi to'lovlar uchun ${formatCurrency(upcomingBills || 0)} ajratildi.`
+                            : `⚠️ Diqqat! Kelgusi to'lovlar (${formatCurrency(upcomingBills || 0)}) balansingizning katta qismini egallaydi.`}
                     </p>
                 </div>
             </div>

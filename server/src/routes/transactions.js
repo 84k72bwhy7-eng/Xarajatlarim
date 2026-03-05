@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import auth from '../middleware/auth.js';
 import { autoCategorize } from '../services/categorizer.js';
+import { convertToUZS, convertFromUZS } from '../services/currency.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -12,10 +13,25 @@ router.use(auth);
 // POST /api/transactions — Tranzaksiya qo'shish
 router.post('/', async (req, res) => {
     try {
-        const { type, amount, description, note, tags, date, accountId, categoryId, transferToAccountId } = req.body;
+        const { type, amount, description, note, tags, date, accountId, categoryId, transferToAccountId, originalCurrency } = req.body;
+        // Front-end can send `amount` as the inputted value. 
+        // We will treat the inputted `amount` as `originalAmount`.
+        const inputAmount = parseFloat(amount);
 
-        if (!type || !amount || !accountId) {
+        if (!type || !inputAmount || !accountId) {
             return res.status(400).json({ error: 'type, amount va accountId kerak' });
+        }
+
+        // Get user to know base currency
+        const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { currency: true } });
+        const baseCurrency = user.currency || 'UZS';
+        const txCurrency = originalCurrency || baseCurrency;
+
+        // Convert if currencies don't match
+        let finalAmount = inputAmount;
+        if (txCurrency !== baseCurrency) {
+            const inUzs = await convertToUZS(inputAmount, txCurrency);
+            finalAmount = await convertFromUZS(inUzs, baseCurrency);
         }
 
         // Auto-categorize if no category provided
@@ -30,7 +46,9 @@ router.post('/', async (req, res) => {
             const transaction = await tx.transaction.create({
                 data: {
                     type,
-                    amount: parseFloat(amount),
+                    amount: finalAmount,
+                    originalAmount: inputAmount,
+                    originalCurrency: txCurrency,
                     description,
                     note,
                     tags: tags || [],
@@ -44,7 +62,7 @@ router.post('/', async (req, res) => {
             });
 
             // Update source account balance
-            const balanceChange = type === 'INCOME' ? parseFloat(amount) : -parseFloat(amount);
+            const balanceChange = type === 'INCOME' ? finalAmount : -finalAmount;
             await tx.account.update({
                 where: { id: accountId },
                 data: { balance: { increment: balanceChange } },
@@ -54,7 +72,7 @@ router.post('/', async (req, res) => {
             if (type === 'TRANSFER' && transferToAccountId) {
                 await tx.account.update({
                     where: { id: transferToAccountId },
-                    data: { balance: { increment: parseFloat(amount) } },
+                    data: { balance: { increment: finalAmount } },
                 });
             }
 

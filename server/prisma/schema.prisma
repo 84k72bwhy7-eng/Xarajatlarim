@@ -101,10 +101,12 @@ enum TransactionType {
 model Transaction {
   id          String          @id @default(cuid())
   type        TransactionType
-  amount      Float
-  description String?
-  note        String?
-  tags        String[]        @default([])
+  amount              Float
+  originalAmount      Float?
+  originalCurrency    String?         @default("UZS")
+  description         String?
+  note                String?
+  tags                String[]        @default([])
   date        DateTime        @default(now())
   userId      String
   accountId   String

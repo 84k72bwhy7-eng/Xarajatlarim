@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Loader2, Leaf } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { createTransaction, getCategories, getAccounts } from '../lib/api';
+import { createTransaction, getCategories, getAccounts, getExchangeRate } from '../lib/api';
 import { getCategoryName } from '../lib/categoryTranslations';
 
 export default function AddTransactionModal({ isOpen, onClose, onSuccess, initialData = {} }) {
@@ -9,14 +9,24 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
     const [accounts, setAccounts] = useState([]);
+    const [exchangeRate, setExchangeRate] = useState(null);
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const baseCurrency = user.currency || 'UZS';
     const [form, setForm] = useState({
         type: 'EXPENSE',
         amount: '',
+        currency: baseCurrency,
         category: '',
         account: '',
         date: new Date().toISOString().split('T')[0],
         description: '',
     });
+
+    useEffect(() => {
+        getExchangeRate().then(r => {
+            if (r.data?.rate) setExchangeRate(r.data.rate);
+        }).catch(() => { });
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -25,6 +35,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                 type: initialData.type || 'EXPENSE',
                 category: initialData.categoryId || '',
                 amount: '',
+                currency: baseCurrency,
                 description: '',
                 date: new Date().toISOString().split('T')[0],
             }));
@@ -65,6 +76,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
             await createTransaction({
                 type: form.type,
                 amount: parseFloat(form.amount),
+                originalCurrency: form.currency,
                 categoryId: form.category || undefined,
                 accountId: form.account,
                 date: new Date(form.date).toISOString(),
@@ -75,6 +87,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
             setForm({
                 type: 'EXPENSE',
                 amount: '',
+                currency: baseCurrency,
                 category: '',
                 account: '',
                 date: new Date().toISOString().split('T')[0],
@@ -160,15 +173,41 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                         </div>
                     </div>
 
-                    {/* Amount */}
+                    {/* Amount & Currency */}
                     <div>
                         <label style={labelStyle}>{t('transactions.amount')}</label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold" style={{ color: '#a06040' }}>$</span>
-                            <input type="number" name="amount" value={form.amount} onChange={handleChange}
-                                required min="0.01" step="any" placeholder="0.00"
-                                style={{ ...inputStyle, paddingLeft: '32px' }} />
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold" style={{ color: '#a06040' }}>
+                                    {form.currency === 'USD' ? '$' : 'S'}
+                                </span>
+                                <input type="number" name="amount" value={form.amount} onChange={handleChange}
+                                    required min="0.01" step="any" placeholder="0.00"
+                                    style={{ ...inputStyle, paddingLeft: '32px' }} />
+                            </div>
+                            <select
+                                name="currency"
+                                value={form.currency}
+                                onChange={handleChange}
+                                style={{
+                                    ...inputStyle,
+                                    width: '100px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                <option value="UZS">UZS</option>
+                                <option value="USD">USD</option>
+                            </select>
                         </div>
+                        {exchangeRate && form.currency !== baseCurrency && (
+                            <p className="text-xs mt-1 text-slate-500 text-right pr-2">
+                                ~ {
+                                    form.currency === 'USD'
+                                        ? (parseFloat(form.amount || 0) * exchangeRate).toLocaleString() + ' UZS'
+                                        : (parseFloat(form.amount || 0) / exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USD'
+                                } (1 USD = {exchangeRate.toLocaleString()} UZS)
+                            </p>
+                        )}
                     </div>
 
                     {/* Category */}

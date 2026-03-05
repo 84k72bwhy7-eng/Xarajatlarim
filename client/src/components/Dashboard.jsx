@@ -9,6 +9,7 @@ import CategoryPieChart from './CategoryPieChart';
 import SafeToSpend from './SafeToSpend';
 import AddTransactionModal from './AddTransactionModal';
 import { getDashboardSummary, getDebts, getGoals, createCategory, updateCategory, deleteCategory } from '../lib/api';
+import { formatCurrency } from '../lib/format';
 
 export default function Dashboard({ tgUser }) {
     const { t } = useTranslation();
@@ -157,6 +158,8 @@ export default function Dashboard({ tgUser }) {
     const totalGoalTarget = activeGoals.reduce((sum, g) => sum + Number(g.targetAmount), 0);
     const totalGoalCollected = activeGoals.reduce((sum, g) => sum + Number(g.savedAmount || 0), 0);
 
+
+
     return (
         <>
             <AddTransactionModal isOpen={showTxModal} onClose={() => { setShowTxModal(false); setTxInitialData({}); }} onSuccess={fetchData} initialData={txInitialData} />
@@ -211,7 +214,7 @@ export default function Dashboard({ tgUser }) {
                         <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-forest-600 bg-forest-50 mb-1 sm:mb-2">
                             <Wallet size={14} className="sm:w-4 sm:h-4" />
                         </div>
-                        <h3 className="text-sm sm:text-2xl font-black text-forest-900 truncate w-full">${d.netWorth.toLocaleString()}</h3>
+                        <h3 className="text-sm sm:text-2xl font-black text-forest-900 truncate w-full">{formatCurrency(d.netWorth)}</h3>
                         <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">{t('dashboard.balance')}</span>
                     </div>
 
@@ -221,7 +224,7 @@ export default function Dashboard({ tgUser }) {
                             <HandCoins size={14} className="sm:w-4 sm:h-4" />
                         </div>
                         <div className="flex flex-col items-center w-full">
-                            <p className="text-[10px] sm:text-sm text-red-500 font-bold truncate w-full">-${Number(debtData.stats?.totalGivenRemaining || 0).toLocaleString()}</p>
+                            <p className="text-[10px] sm:text-sm text-red-500 font-bold truncate w-full">-{formatCurrency(debtData.stats?.totalGivenRemaining || 0)}</p>
                             <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('debts.title')}</span>
                         </div>
                     </a>
@@ -233,7 +236,7 @@ export default function Dashboard({ tgUser }) {
                         </div>
                         <div className="flex flex-col items-center w-full">
                             <p className="text-[10px] sm:text-sm font-black text-forest-900 truncate w-full">
-                                ${totalGoalCollected.toLocaleString()} {totalGoalTarget > 0 ? `/ $${totalGoalTarget.toLocaleString()}` : ''}
+                                {formatCurrency(totalGoalCollected)} {totalGoalTarget > 0 ? `/ ${formatCurrency(totalGoalTarget)}` : ''}
                             </p>
                             <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('goals.title')}</span>
                         </div>
@@ -286,9 +289,9 @@ export default function Dashboard({ tgUser }) {
                                     {/* Amount Details */}
                                     <div className="flex flex-col sm:flex-row sm:items-end justify-between font-medium text-[10px] sm:text-xs mb-1 sm:mb-2">
                                         <span className={`font-bold text-xs sm:text-sm truncate w-full ${isOver ? 'text-red-500' : 'text-forest-700'}`}>
-                                            ${spent.toLocaleString()}
+                                            {formatCurrency(spent)}
                                         </span>
-                                        <span className="text-slate-400 text-[9px] sm:text-xs">/ ${limit > 0 ? limit.toLocaleString() : '∞'}</span>
+                                        <span className="text-slate-400 text-[9px] sm:text-xs">/ {limit > 0 ? formatCurrency(limit) : '∞'}</span>
                                     </div>
 
                                     {/* Progress Bar */}
@@ -304,7 +307,7 @@ export default function Dashboard({ tgUser }) {
                                     {/* Warning text */}
                                     {isOver && (
                                         <p className="text-[10px] text-red-500 mt-2 font-bold animate-pulse">
-                                            {t('dashboard.overLimit')} (-${(spent - limit).toLocaleString()})
+                                            {t('dashboard.overLimit')} (-{formatCurrency(spent - limit)})
                                         </p>
                                     )}
                                 </div>
@@ -366,7 +369,7 @@ export default function Dashboard({ tgUser }) {
                                                 </div>
                                                 <div className="text-right">
                                                     <p className={`text-sm font-bold`} style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
-                                                        {tx.type === 'INCOME' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
+                                                        {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
                                                     </p>
                                                     <p className="text-xs" style={{ color: '#a06040' }}>{new Date(tx.date).toLocaleDateString()}</p>
                                                 </div>

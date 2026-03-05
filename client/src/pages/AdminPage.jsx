@@ -6,6 +6,7 @@ import {
     UserCircle, Mail, Calendar, CreditCard
 } from 'lucide-react';
 import { getAdminUsers, getAdminStats, updateAdminUserRole, deleteAdminUser } from '../lib/api';
+import { formatCurrency } from '../lib/format';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white p-5 rounded-2xl shadow-sm border border-forest-50 flex items-center gap-4">
@@ -91,7 +92,7 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard title="Foydalanuvchilar" value={stats?.users || 0} icon={Users} color="#1a4d3a" />
                 <StatCard title="Tranzaksiyalar" value={stats?.transactions || 0} icon={Activity} color="#2d7a55" />
-                <StatCard title="Umumiy aylanma" value={`$${Number(stats?.totalVolume || 0).toLocaleString()}`} icon={BarChart3} color="#7d4e31" />
+                <StatCard title="Umumiy aylanma" value={formatCurrency(stats?.totalVolume)} icon={BarChart3} color="#7d4e31" />
             </div>
 
             {/* Users Table */}

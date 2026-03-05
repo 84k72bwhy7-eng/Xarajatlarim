@@ -5,11 +5,12 @@ import {
     Edit2, Wallet, Tag, ChevronRight, Loader2, Leaf
 } from 'lucide-react';
 import {
-    getProfile, updateProfile, updatePassword,
+    getProfile, updateProfile, updatePassword, changeCurrency,
     getCategories, createCategory, updateCategory, deleteCategory,
     getAccounts, createAccount, updateAccount, deleteAccount
 } from '../lib/api';
 import { getCategoryName } from '../lib/categoryTranslations';
+import { formatCurrency } from '../lib/format';
 
 export default function ProfilePage() {
     const { t, i18n } = useTranslation();
@@ -101,10 +102,33 @@ export default function ProfilePage() {
         try {
             await updateProfile(profileForm);
             alert('Profil yangilandi!');
-            // Update global state or trigger refresh if needed
-            window.location.reload(); // Refresh to update navbar avatar
+            window.location.reload();
         } catch (err) {
             alert(err.response?.data?.error || 'Xatolik yuz berdi');
+        }
+    };
+
+    const handleCurrencyChange = async (newCurrency) => {
+        if (user.currency === newCurrency) return;
+
+        const confirmMsg = `Diqqat! Asosiy valyutani ${newCurrency} ga o'zgartirmoqchisiz.\n\nBunda sizning barcha joriy balanslaringiz, xarajat va daromadlaringiz, qarz va maqsadlaringiz avtomatik tarzda Markaziy Bankning joriy kursi bo'yicha (${newCurrency} ga) o'giriladi.\n\nRozimisiz?`;
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            setLoading(true);
+            const res = await changeCurrency(newCurrency);
+            alert(res.message || 'Valyuta o\'zgartirildi');
+
+            // LocalStoragedagi user ma'lumotini ham yangilaymiz
+            const savedUser = JSON.parse(localStorage.getItem('user')) || {};
+            savedUser.currency = newCurrency;
+            localStorage.setItem('user', JSON.stringify(savedUser));
+
+            window.location.reload();
+        } catch (err) {
+            alert(err.response?.data?.error || 'Valyutani o\'zgartirishda xato yuz berdi');
+            setLoading(false);
         }
     };
 
@@ -337,6 +361,37 @@ export default function ProfilePage() {
                             <Save size={18} /> Saqlash
                         </button>
                     </form>
+
+                    <hr className="my-6 border-forest-100" />
+
+                    <div className="space-y-3">
+                        <label className="text-sm font-bold text-forest-800">Asosiy Valyuta</label>
+                        <p className="text-xs text-slate-500 mb-2">
+                            Valyutani o'zgartirsangiz, barcha hisobotlaringiz Markaziy Bank (cbu.uz) ning joriy kursi bo'yicha avtomatik konvertatsiya qilinadi.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => handleCurrencyChange('UZS')}
+                                className={`flex-1 py-3 rounded-xl font-bold transition-all border-2 ${user?.currency === 'UZS'
+                                    ? 'bg-forest-600 border-forest-600 text-white shadow-lg'
+                                    : 'bg-forest-50 border-forest-100 text-forest-800 hover:bg-forest-100'
+                                    }`}
+                            >
+                                So'm (UZS)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleCurrencyChange('USD')}
+                                className={`flex-1 py-3 rounded-xl font-bold transition-all border-2 ${user?.currency === 'USD'
+                                    ? 'bg-forest-600 border-forest-600 text-white shadow-lg'
+                                    : 'bg-forest-50 border-forest-100 text-forest-800 hover:bg-forest-100'
+                                    }`}
+                            >
+                                Dollar (USD)
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -425,7 +480,7 @@ export default function ProfilePage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-forest-900">{acc.name}</p>
-                                            <p className="text-xs text-forest-600 font-bold">${Number(acc.balance).toLocaleString()}</p>
+                                            <p className="text-xs text-forest-600 font-bold">{formatCurrency(acc.balance)}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
@@ -507,7 +562,7 @@ export default function ProfilePage() {
                             </div>
                             {categoryForm.type === 'EXPENSE' && (
                                 <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1">Oylik Limit ($)</label>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1">Oylik Limit ({user?.currency || 'UZS'})</label>
                                     <input
                                         type="number"
                                         min="0"

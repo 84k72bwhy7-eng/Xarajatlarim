@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getTransactions } from '../lib/api';
 import AddTransactionModal from '../components/AddTransactionModal';
 import { getCategoryName } from '../lib/categoryTranslations';
+import { formatCurrency } from '../lib/format';
 
 export default function TransactionsPage() {
     const { t, i18n } = useTranslation();
@@ -129,7 +130,7 @@ export default function TransactionsPage() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm font-bold" style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
-                                            {tx.type === 'INCOME' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
+                                            {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
                                         </p>
                                         <p className="text-xs mt-0.5" style={{ color: '#a06040' }}>
                                             {new Date(tx.date).toLocaleDateString()}

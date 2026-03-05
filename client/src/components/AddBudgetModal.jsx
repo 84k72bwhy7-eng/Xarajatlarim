@@ -8,6 +8,7 @@ export default function AddBudgetModal({ isOpen, onClose, onSuccess }) {
     const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
+    const userCurrency = JSON.parse(localStorage.getItem('user') || '{}').currency || 'UZS';
 
     const [form, setForm] = useState({
         amount: '',
@@ -101,7 +102,7 @@ export default function AddBudgetModal({ isOpen, onClose, onSuccess }) {
                     <div>
                         <label style={labelStyle}>{t('transactions.amount')}</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold" style={{ color: '#a06040' }}>$</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold" style={{ color: '#a06040' }}>{userCurrency === 'USD' ? '$' : 'UZS'}</span>
                             <input type="number" name="amount" value={form.amount} onChange={handleChange}
                                 required min="0.01" step="any" placeholder="0.00"
                                 style={{ ...inputStyle, paddingLeft: '32px' }} />
