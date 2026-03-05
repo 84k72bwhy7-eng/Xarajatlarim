@@ -35,7 +35,13 @@ export default function AppLayout({ tgUser, user }) {
         <div className="min-h-screen pb-20 sm:pb-0" style={{ backgroundColor: '#f0f5f2' }}>
             {/* Top Navbar */}
             <nav className="sticky top-0 z-30 px-4 py-3 flex items-center justify-between"
-                style={{ backgroundColor: '#1a4d3a', boxShadow: '0 2px 12px rgba(26, 77, 58, 0.4)' }}>
+                style={{
+                    backgroundColor: '#1a4d3a',
+                    boxShadow: '0 2px 12px rgba(26, 77, 58, 0.4)',
+                    paddingTop: typeof window !== 'undefined' && window.Telegram?.WebApp?.safeAreaInset?.top
+                        ? `calc(${window.Telegram.WebApp.safeAreaInset.top}px + 0.75rem)`
+                        : '0.75rem' // fallback 0.75rem (py-3 = 12px)
+                }}>
                 {/* Logo */}
                 <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center"
