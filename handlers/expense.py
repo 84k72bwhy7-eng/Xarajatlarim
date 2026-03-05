@@ -26,11 +26,14 @@ async def get_main_keyboard(pool, user_id):
     builder.button(text="🚀 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
     
     # 2. Foydalanuvchi kategoriyalari
-    categories = await db.get_user_categories(pool, user_id)
-    for cat in categories:
-        # "🍔 Ovqat" ko'rinishida tugma
-        btn_text = f"{cat['icon']} {cat['name']}"
-        builder.button(text=btn_text)
+    if pool:
+        try:
+            categories = await db.get_user_categories(pool, user_id)
+            for cat in categories:
+                btn_text = f"{cat['icon']} {cat['name']}"
+                builder.button(text=btn_text)
+        except Exception as e:
+            print(f"Error fetching categories: {e}")
     
     builder.adjust(1, 2)
     return builder.as_markup(resize_keyboard=True)
@@ -43,6 +46,10 @@ async def process_category_click(message: Message, state: FSMContext):
     cat_name = btn_text.split(" ", 1)[1] if " " in btn_text else btn_text
     
     pool = message.bot.pool
+    if not pool:
+        await message.answer("❌ Ma'lumotlar bazasiga ulanishda xato. Iltimos, administratorga murojaat qiling.")
+        return
+
     user = await db.get_user_by_tg_id(pool, message.from_user.id)
     
     if not user:

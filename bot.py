@@ -103,8 +103,23 @@ async def main():
     logger.info("🤖 Bot ishga tushmoqda...")
     
     # DB Pool yaratish
-    bot.pool = await db.get_db_pool()
-    logger.info("✅ PostgreSQL bog'lanishi o'rnatildi")
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        logger.error("❌ DATABASE_URL topilmadi! .env faylini tekshiring.")
+        # Ehtimol server/.env dan olishga harakat qilamiz
+        load_dotenv("server/.env")
+        db_url = os.getenv("DATABASE_URL")
+    
+    if not db_url:
+        logger.error("❌ DATABASE_URL hali ham yo'q. Bot to'liq ishlamasligi mumkin.")
+        bot.pool = None
+    else:
+        try:
+            bot.pool = await db.get_db_pool()
+            logger.info("✅ PostgreSQL bog'lanishi o'rnatildi")
+        except Exception as e:
+            logger.error(f"❌ DB ga ulanishda xato: {e}")
+            bot.pool = None
     
     # Bot UI ni sozlash
     await setup_bot_ui()
