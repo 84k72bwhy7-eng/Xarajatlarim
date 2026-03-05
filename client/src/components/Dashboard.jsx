@@ -160,7 +160,7 @@ export default function Dashboard({ tgUser }) {
                         </div>
                         <div className="flex flex-col items-center w-full">
                             <p className="text-[10px] sm:text-sm font-black text-forest-900 truncate w-full">
-                                ${totalGoalCollected.toLocaleString()}
+                                ${totalGoalCollected.toLocaleString()} {totalGoalTarget > 0 ? `/ $${totalGoalTarget.toLocaleString()}` : ''}
                             </p>
                             <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('goals.title')}</span>
                         </div>
@@ -196,7 +196,7 @@ export default function Dashboard({ tgUser }) {
                                         </div>
                                     </div>
 
-                                    <h4 className="font-bold text-forest-900 leading-tight mb-2 truncate text-sm sm:text-base">{cat.name}</h4>
+                                    <h4 className="font-bold text-forest-900 leading-tight mb-2 truncate text-sm sm:text-base">{t(`categories.${cat.name}`, cat.name)}</h4>
 
                                     {/* Amount Details */}
                                     <div className="flex flex-col sm:flex-row sm:items-end justify-between font-medium text-[10px] sm:text-xs mb-1 sm:mb-2">
@@ -275,8 +275,8 @@ export default function Dashboard({ tgUser }) {
                                                         {tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸')}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{tx.description || tx.category?.name || '-'}</p>
-                                                        <p className="text-xs" style={{ color: '#7d4e31' }}>{tx.category?.name}</p>
+                                                        <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{tx.description || t(`categories.${tx.category?.name}`, tx.category?.name) || '-'}</p>
+                                                        <p className="text-xs" style={{ color: '#7d4e31' }}>{t(`categories.${tx.category?.name}`, tx.category?.name)}</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">

@@ -12,7 +12,7 @@ export default function CategoryPieChart({ data }) {
         if (active && payload?.length) {
             return (
                 <div className="rounded-xl p-3 text-sm" style={{ backgroundColor: '#1a4d3a', color: 'white', boxShadow: '0 8px 20px rgba(0,0,0,0.25)' }}>
-                    <p className="font-semibold">{payload[0].name}</p>
+                    <p className="font-semibold">{t(`categories.${payload[0].name}`, payload[0].name)}</p>
                     <p className="text-white/70 mt-0.5">${Number(payload[0].value).toLocaleString()}</p>
                 </div>
             );
@@ -56,7 +56,7 @@ export default function CategoryPieChart({ data }) {
                 {data.slice(0, 4).map((cat, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs">
                         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }}></div>
-                        <span className="truncate" style={{ color: '#7d4e31' }}>{cat.name}</span>
+                        <span className="truncate" style={{ color: '#7d4e31' }}>{t(`categories.${cat.name}`, cat.name)}</span>
                         <span className="font-semibold ml-auto" style={{ color: '#1a4d3a' }}>${Number(cat.total).toLocaleString()}</span>
                     </div>
                 ))}

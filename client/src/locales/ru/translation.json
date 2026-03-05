@@ -145,6 +145,22 @@
         "passwordChange": "Изменить пароль",
         "save": "Сохранить"
     },
+    "categories": {
+        "Boshqa": "Другое",
+        "bozor": "Рынок",
+        "Internet": "Интернет",
+        "Kiyim": "Одежда",
+        "Kommunal": "Коммунальные",
+        "Ko'ngil ochar": "Развлечения",
+        "Oziq-ovqat": "Питание",
+        "Sog'liq": "Здоровье",
+        "Ta'lim": "Образование",
+        "Uy": "Дом",
+        "Transport": "Транспорт",
+        "Biznes": "Бизнес",
+        "Sayohat": "Путешествия",
+        "Sovg'alar": "Подарки"
+    },
     "admin": {
         "title": "Панель SuperAdmin",
         "stats": "Статистика",

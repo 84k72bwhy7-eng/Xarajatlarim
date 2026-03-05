@@ -145,6 +145,22 @@
         "passwordChange": "Parolni o'zgartirish",
         "save": "Saqlash"
     },
+    "categories": {
+        "Boshqa": "Boshqa",
+        "bozor": "Bozor",
+        "Internet": "Internet",
+        "Kiyim": "Kiyim",
+        "Kommunal": "Kommunal",
+        "Ko'ngil ochar": "Ko'ngil ochar",
+        "Oziq-ovqat": "Oziq-ovqat",
+        "Sog'liq": "Sog'liq",
+        "Ta'lim": "Ta'lim",
+        "Uy": "Uy",
+        "Transport": "Transport",
+        "Biznes": "Biznes",
+        "Sayohat": "Sayohat",
+        "Sovg'alar": "Sovg'alar"
+    },
     "admin": {
         "title": "SuperAdmin Paneli",
         "stats": "Statistika",
