@@ -5,9 +5,9 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "npx prisma db push && node src/index.js",
     "dev": "nodemon src/index.js",
-    "build": "npx prisma generate && npx prisma db push",
+    "build": "npx prisma generate",
     "db:push": "npx prisma db push",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
