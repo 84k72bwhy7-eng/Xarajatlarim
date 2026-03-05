@@ -5,6 +5,14 @@ export function initializeTelegramApp() {
         WebApp.ready();
         WebApp.expand();
 
+        try {
+            if (WebApp.requestFullscreen) {
+                WebApp.requestFullscreen();
+            }
+        } catch (e) {
+            console.error('Fullscreen request failed:', e);
+        }
+
         // Theme colors synchronization
         const applyTheme = () => {
             document.body.style.backgroundColor = WebApp.backgroundColor || '#f8fafc';
