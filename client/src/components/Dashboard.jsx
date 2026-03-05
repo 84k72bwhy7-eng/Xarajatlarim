@@ -17,6 +17,9 @@ export default function Dashboard({ tgUser }) {
     const [showTxModal, setShowTxModal] = useState(false);
     const [txInitialData, setTxInitialData] = useState({});
 
+    // Touch Drag State
+    const [touchDrag, setTouchDrag] = useState({ active: false, type: null, x: 0, y: 0, label: '', icon: null });
+
     // Summary Data States
     const [debtData, setDebtData] = useState({ debts: [], stats: {} });
     const [goalData, setGoalData] = useState({ goals: [], stats: {} });
@@ -43,6 +46,54 @@ export default function Dashboard({ tgUser }) {
             setLoading(false);
         }
     }, []);
+
+    // Touch Handlers
+    const handleTouchStart = (e, type, label, icon) => {
+        const touch = e.touches[0];
+        setTouchDrag({
+            active: true,
+            type,
+            x: touch.clientX,
+            y: touch.clientY,
+            label,
+            icon
+        });
+    };
+
+    const handleTouchMove = (e) => {
+        if (!touchDrag.active) return;
+        const touch = e.touches[0];
+        setTouchDrag(prev => ({ ...prev, x: touch.clientX, y: touch.clientY }));
+
+        // Prevent scroll when dragging
+        if (e.cancelable) e.preventDefault();
+    };
+
+    const handleTouchEnd = (e) => {
+        if (!touchDrag.active) return;
+
+        const x = touchDrag.x;
+        const y = touchDrag.y;
+        setTouchDrag({ active: false, type: null, x: 0, y: 0, label: '', icon: null });
+
+        // Find drop target
+        const element = document.elementFromPoint(x, y);
+        if (!element) return;
+
+        const dropTarget = element.closest('[data-drop-target]');
+        if (!dropTarget) return;
+
+        const targetType = dropTarget.getAttribute('data-drop-type');
+        const targetId = dropTarget.getAttribute('data-drop-id');
+
+        if (touchDrag.type === 'add' && targetType === 'wallet') {
+            setTxInitialData({ type: 'INCOME' });
+            setShowTxModal(true);
+        } else if (touchDrag.type === 'wallet' && targetType === 'category') {
+            setTxInitialData({ type: 'EXPENSE', categoryId: targetId });
+            setShowTxModal(true);
+        }
+    };
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -128,8 +179,11 @@ export default function Dashboard({ tgUser }) {
                     <button
                         draggable
                         onDragStart={(e) => e.dataTransfer.setData('type', 'add')}
+                        onTouchStart={(e) => handleTouchStart(e, 'add', t('transactions.addTransaction'), <Plus size={20} />)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         onClick={() => { setTxInitialData({}); setShowTxModal(true); }}
-                        className="rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white cursor-grab active:cursor-grabbing"
+                        className="rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white cursor-grab active:cursor-grabbing touch-none"
                         style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 4px 12px rgba(26,77,58,0.2)' }}
                     >
                         <Plus size={24} className="sm:w-9 sm:h-9" strokeWidth={2.5} />
@@ -140,6 +194,9 @@ export default function Dashboard({ tgUser }) {
                     <div
                         draggable
                         onDragStart={(e) => e.dataTransfer.setData('type', 'wallet')}
+                        onTouchStart={(e) => handleTouchStart(e, 'wallet', t('dashboard.balance'), <Wallet size={20} />)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => {
                             if (e.dataTransfer.getData('type') === 'add') {
@@ -148,7 +205,9 @@ export default function Dashboard({ tgUser }) {
                                 setShowTxModal(true);
                             }
                         }}
-                        className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition cursor-grab active:cursor-grabbing" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
+                        data-drop-target
+                        data-drop-type="wallet"
+                        className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition cursor-grab active:cursor-grabbing touch-none" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
                         <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-forest-600 bg-forest-50 mb-1 sm:mb-2">
                             <Wallet size={14} className="sm:w-4 sm:h-4" />
                         </div>
@@ -209,6 +268,9 @@ export default function Dashboard({ tgUser }) {
                                             setShowTxModal(true);
                                         }
                                     }}
+                                    data-drop-target
+                                    data-drop-type="category"
+                                    data-drop-id={cat.id}
                                     className="bg-white rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group border border-transparent hover:border-forest-200"
                                     style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.06)' }}
                                 >
@@ -406,6 +468,32 @@ export default function Dashboard({ tgUser }) {
                             </div>
                         </form>
                     </div>
+                </div>
+            )}
+
+            {/* Touch Drag Ghost Element */}
+            {touchDrag.active && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        left: touchDrag.x,
+                        top: touchDrag.y,
+                        transform: 'translate(-50%, -50%) scale(1.1)',
+                        zIndex: 9999,
+                        pointerEvents: 'none',
+                        background: 'rgba(255,255,255,0.95)',
+                        border: '2px solid #1a4d3a',
+                        borderRadius: '16px',
+                        padding: '10px 15px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                        whiteSpace: 'nowrap'
+                    }}
+                >
+                    <div style={{ color: '#1a4d3a' }}>{touchDrag.icon}</div>
+                    <span style={{ color: '#1a4d3a', fontWeight: 'bold', fontSize: '13px' }}>{touchDrag.label}</span>
                 </div>
             )}
         </>
