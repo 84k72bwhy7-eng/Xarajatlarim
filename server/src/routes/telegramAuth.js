@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // Telegram Web App orqali login
-router.post('/telegram', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { initData } = req.body;
 
