@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { createTransaction, getCategories, getAccounts } from '../lib/api';
 import { getCategoryName } from '../lib/categoryTranslations';
 
-export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
+export default function AddTransactionModal({ isOpen, onClose, onSuccess, initialData = {} }) {
     const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
@@ -20,7 +20,22 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
 
     useEffect(() => {
         if (isOpen) {
-            getCategories().then(r => setCategories(r.data || [])).catch(() => { });
+            setForm(prev => ({
+                ...prev,
+                type: initialData.type || 'EXPENSE',
+                category: initialData.categoryId || '',
+                amount: '',
+                description: '',
+                date: new Date().toISOString().split('T')[0],
+            }));
+
+            getCategories().then(r => {
+                const cats = r.data || [];
+                setCategories(cats);
+                if (initialData.categoryId) {
+                    setForm(prev => ({ ...prev, category: initialData.categoryId }));
+                }
+            }).catch(() => { });
             getAccounts().then(r => {
                 const accs = r.data || [];
                 setAccounts(accs);
@@ -29,7 +44,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                 }
             }).catch(() => { });
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
