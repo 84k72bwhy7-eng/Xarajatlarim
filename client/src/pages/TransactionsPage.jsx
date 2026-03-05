@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Loader2, Leaf } from 'lucide-react';
+import { Plus, Search, Loader2, Leaf, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getTransactions } from '../lib/api';
+import { getTransactions, deleteTransaction } from '../lib/api';
 import AddTransactionModal from '../components/AddTransactionModal';
 import { getCategoryName } from '../lib/categoryTranslations';
 import { formatCurrency } from '../lib/format';
@@ -24,6 +24,17 @@ export default function TransactionsPage() {
             setTransactions([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm(t('common.confirmDelete') || "Rostdan ham o'chirmoqchimisiz?")) return;
+        try {
+            await deleteTransaction(id);
+            fetchTransactions();
+        } catch (err) {
+            console.error('Delete transaction error:', err);
+            alert(err.response?.data?.error || "Xatolik yuz berdi");
         }
     };
 
@@ -132,9 +143,18 @@ export default function TransactionsPage() {
                                         <p className="text-sm font-bold" style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
                                             {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
                                         </p>
-                                        <p className="text-xs mt-0.5" style={{ color: '#a06040' }}>
-                                            {new Date(tx.date).toLocaleDateString()}
-                                        </p>
+                                        <div className="flex items-center justify-end gap-2 mt-0.5">
+                                            <p className="text-xs" style={{ color: '#a06040' }}>
+                                                {new Date(tx.date).toLocaleDateString()}
+                                            </p>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(tx.id); }}
+                                                className="p-1 text-red-500 hover:bg-red-50 rounded-lg transition"
+                                                title="O'chirish"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

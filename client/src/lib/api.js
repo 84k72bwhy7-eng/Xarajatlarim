@@ -65,6 +65,7 @@ export const getDashboardSummary = () => api.get('/dashboard/summary');
 export const getSafeToSpend = () => api.get('/dashboard/safe-to-spend');
 export const getTransactions = (params) => api.get('/transactions', { params });
 export const createTransaction = (data) => api.post('/transactions', data);
+export const deleteTransaction = (id) => api.delete(`/transactions/${id}`);
 
 // Categories
 export const getCategories = () => api.get(`/categories?t=${Date.now()}`);
