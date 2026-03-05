@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Leaf, User, Shield, HandCoins, Target } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, Coins, User, Shield, HandCoins, Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logout } from '../lib/api';
 
@@ -48,7 +48,7 @@ export default function AppLayout({ tgUser, user }) {
                 <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                        <Leaf size={18} className="text-white" />
+                        <Coins size={18} className="text-white" />
                     </div>
                     <span className="text-lg font-bold text-white tracking-tight">
                         {t('app.title')}
