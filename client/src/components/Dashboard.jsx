@@ -99,7 +99,11 @@ export default function Dashboard({ tgUser }) {
 
     const d = data || { netWorth: 0, categoryBreakdown: [] };
     const userName = tgUser?.first_name || JSON.parse(localStorage.getItem('user') || '{}')?.name || '';
-    const activeGoalsCount = goalData.goals?.filter(g => !g.isCompleted).length || 0;
+
+    // Goals Calculation
+    const activeGoals = goalData.goals?.filter(g => !g.isCompleted) || [];
+    const totalGoalTarget = activeGoals.reduce((sum, g) => sum + Number(g.targetAmount), 0);
+    const totalGoalCollected = activeGoals.reduce((sum, g) => sum + Number(g.currentAmount), 0);
 
     return (
         <>
@@ -126,13 +130,13 @@ export default function Dashboard({ tgUser }) {
                         style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 8px 24px rgba(26,77,58,0.3)' }}
                     >
                         <Plus size={36} strokeWidth={2.5} />
-                        <span className="font-bold text-sm tracking-wide text-center leading-tight">Tranzaksiya qo'shish</span>
+                        <span className="font-bold text-sm tracking-wide text-center leading-tight">{t('transactions.addTransaction')}</span>
                     </button>
 
                     {/* 2. Balance */}
                     <div className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition" style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Hisobim</span>
+                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">{t('dashboard.balance')}</span>
                             <div className="w-8 h-8 rounded-xl flex items-center justify-center text-forest-600 bg-forest-50">
                                 <Wallet size={16} />
                             </div>
@@ -163,8 +167,11 @@ export default function Dashboard({ tgUser }) {
                             </div>
                         </div>
                         <div>
-                            <p className="text-2xl font-black text-forest-900">{activeGoalsCount}</p>
-                            <p className="text-xs font-semibold text-slate-400 mt-0.5">Faolmaqsadlar</p>
+                            <p className="text-2xl font-black text-forest-900 flex items-baseline gap-1">
+                                ${totalGoalCollected.toLocaleString()}
+                                <span className="text-sm font-semibold text-slate-400">/ ${totalGoalTarget.toLocaleString()}</span>
+                            </p>
+                            <p className="text-xs font-semibold text-slate-400 mt-0.5">{t('goals.collected')} / {t('goals.target')}</p>
                         </div>
                     </a>
                 </div>
@@ -173,7 +180,7 @@ export default function Dashboard({ tgUser }) {
                 <div className="pt-2">
                     <h2 className="text-lg font-bold text-forest-900 mb-4 flex items-center gap-2">
                         <span className="w-1.5 h-5 rounded-full" style={{ backgroundColor: '#7d4e31' }}></span>
-                        Kategoriyalar va Limitlar
+                        {t('dashboard.categoriesAndLimits')}
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {d.categoryBreakdown.map(cat => {
@@ -221,7 +228,7 @@ export default function Dashboard({ tgUser }) {
                                     {/* Warning text */}
                                     {isOver && (
                                         <p className="text-[10px] text-red-500 mt-2 font-bold animate-pulse">
-                                            Limitdan oshdi! (-${(spent - limit).toLocaleString()})
+                                            {t('dashboard.overLimit')} (-${(spent - limit).toLocaleString()})
                                         </p>
                                     )}
                                 </div>
@@ -236,7 +243,7 @@ export default function Dashboard({ tgUser }) {
                             <div className="w-12 h-12 rounded-full flex items-center justify-center text-white mb-3 shadow-md transition-transform group-hover:scale-110" style={{ backgroundColor: '#7d4e31' }}>
                                 <Plus size={24} strokeWidth={3} />
                             </div>
-                            <span className="text-sm font-bold text-slate-500 group-hover:text-earth-600 transition-colors">Qo'shish</span>
+                            <span className="text-sm font-bold text-slate-500 group-hover:text-earth-600 transition-colors">{t('dashboard.addCategory')}</span>
                         </div>
                     </div>
                 </div>
@@ -311,7 +318,7 @@ export default function Dashboard({ tgUser }) {
                     <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-5">
                             <h3 className="text-xl font-bold text-forest-900">
-                                {editingCategory ? 'Tahrirlash' : 'Yangi kategoriya'}
+                                {editingCategory ? t('dashboard.edit') : t('dashboard.newCategory')}
                             </h3>
                             {editingCategory && (
                                 <button type="button" onClick={() => handleCatDelete(editingCategory.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition">
@@ -322,7 +329,7 @@ export default function Dashboard({ tgUser }) {
 
                         <form onSubmit={handleCatSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1.5">Nomi</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.categoryName')}</label>
                                 <input
                                     type="text"
                                     required
@@ -333,7 +340,7 @@ export default function Dashboard({ tgUser }) {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1.5">Oylik Limit ($)</label>
+                                <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.monthlyLimit')}</label>
                                 <input
                                     type="number"
                                     min="0"
@@ -342,12 +349,12 @@ export default function Dashboard({ tgUser }) {
                                     className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium font-mono"
                                     placeholder="0 - limitsiz"
                                 />
-                                <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-tight">Ushbu turkumda oyiga qancha pul sarflashni reja qilyapsiz? 0 qilsangiz limit tekshirilmaydi.</p>
+                                <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-tight">{t('dashboard.limitHelpText')}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">Ikonka</label>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.icon')}</label>
                                     <input
                                         type="text"
                                         required
@@ -357,7 +364,7 @@ export default function Dashboard({ tgUser }) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">Rang</label>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.color')}</label>
                                     <input
                                         type="color"
                                         value={catForm.color}
@@ -373,14 +380,14 @@ export default function Dashboard({ tgUser }) {
                                     onClick={() => setIsCatModalOpen(false)}
                                     className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-95 text-forest-800 bg-forest-50 hover:bg-forest-100"
                                 >
-                                    Bekor qilish
+                                    {t('transactions.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95 hover:opacity-90 shadow-lg"
                                     style={{ backgroundColor: '#7d4e31' }}
                                 >
-                                    Saqlash
+                                    {t('transactions.save')}
                                 </button>
                             </div>
                         </form>

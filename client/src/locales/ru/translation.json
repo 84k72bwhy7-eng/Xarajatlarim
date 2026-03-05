@@ -23,7 +23,18 @@
         "viewAll": "Посмотреть все",
         "noTransactions": "Нет транзакций",
         "expensesByCategory": "Расходы по категориям",
-        "sixMonthsCashflow": "Денежный поток (6 мес.)"
+        "sixMonthsCashflow": "Денежный поток (6 мес.)",
+        "balance": "Мой счет",
+        "categoriesAndLimits": "Категории и Лимиты",
+        "overLimit": "Лимит превышен!",
+        "addCategory": "Добавить",
+        "edit": "Редактировать",
+        "newCategory": "Новая категория",
+        "categoryName": "Название",
+        "monthlyLimit": "Месячный лимит ($)",
+        "limitHelpText": "Сколько планируете тратить в этой категории за месяц? 0 - без лимита.",
+        "icon": "Иконка",
+        "color": "Цвет"
     },
     "transactions": {
         "title": "Транзакции",

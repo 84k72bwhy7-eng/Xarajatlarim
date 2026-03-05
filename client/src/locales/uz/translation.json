@@ -23,7 +23,18 @@
         "viewAll": "Barchasini ko'rish",
         "noTransactions": "Tranzaksiyalar yo'q",
         "expensesByCategory": "Kategoriyalar bo'yicha xarajatlar",
-        "sixMonthsCashflow": "So'nggi 6 oy (Keshflou)"
+        "sixMonthsCashflow": "So'nggi 6 oy (Keshflou)",
+        "balance": "Hisobim",
+        "categoriesAndLimits": "Kategoriyalar va Limitlar",
+        "overLimit": "Limitdan oshdi!",
+        "addCategory": "Qo'shish",
+        "edit": "Tahrirlash",
+        "newCategory": "Yangi kategoriya",
+        "categoryName": "Nomi",
+        "monthlyLimit": "Oylik Limit ($)",
+        "limitHelpText": "Ushbu turkumda oyiga qancha pul sarflashni reja qilyapsiz? 0 qilsangiz limit tekshirilmaydi.",
+        "icon": "Ikonka",
+        "color": "Rang"
     },
     "transactions": {
         "title": "Tranzaksiyalar",
