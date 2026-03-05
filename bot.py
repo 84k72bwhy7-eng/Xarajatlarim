@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, BotCommand, WebAppInfo
+from aiogram.types import Message, BotCommand, WebAppInfo, MenuButtonWebApp
 from aiogram.filters import CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
@@ -27,11 +27,7 @@ def get_webapp_keyboard():
     from aiogram.types import WebAppInfo
     builder = ReplyKeyboardBuilder()
     WEBAPP_URL = "https://frontend-production-a930.up.railway.app" 
-    builder.button(text="📱 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
-    builder.button(text="➕ Xarajat qo'shish")
-    builder.button(text="📊 Hisobot")
-    builder.button(text="⚙️ Sozlamalar")
-    builder.adjust(1, 2, 1)
+    builder.button(text="🚀 Ilovani ochish", web_app=WebAppInfo(url=WEBAPP_URL))
     return builder.as_markup(resize_keyboard=True)
 
 @dp.message(CommandStart())
@@ -51,7 +47,7 @@ async def start_handler(message: Message):
         "✅ Kategoriyalashga\n"
         "✅ Statistika ko'rishga\n"
         "✅ Byudjet belgilashga yordam beradi!\n\n"
-        "👆 Yuqoridagi **Ilovani ochish** tugmasi orqali to'liq panelga kiring!"
+        "👇 Pastdagi <b>Ilovani ochish</b> tugmasi orqali to'liq panelga kiring!"
     )
 
     await message.answer(
@@ -66,16 +62,19 @@ async def start_with_ref(message: Message):
     await start_handler(message)
 
 
-async def set_commands():
-    """Bot buyruqlarini o'rnatish"""
-    commands = [
-        BotCommand(command="start", description="🏠 Bosh sahifa"),
-        BotCommand(command="add", description="➕ Xarajat qo'shish"),
-        BotCommand(command="today", description="📅 Bugungi xarajatlar"),
-        BotCommand(command="budget", description="💰 Byudjet"),
-        BotCommand(command="settings", description="⚙️ Sozlamalar"),
-    ]
-    await bot.set_my_commands(commands)
+async def setup_bot_ui():
+    """Bot UI sozlamalari: Buyruqlarni o'chirish va Menu knopkasini o'rnatish"""
+    # 1. Buyruqlarni olib tashlash
+    await bot.delete_my_commands()
+    
+    # 2. Ko'k Menu knopkasini Mini App ga sozlash
+    WEBAPP_URL = "https://frontend-production-a930.up.railway.app"
+    await bot.set_chat_menu_button(
+        menu_button=MenuButtonWebApp(
+            text="Ilovani ochish",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )
+    )
 
 
 async def main():
@@ -86,9 +85,9 @@ async def main():
     db.init_db()
     logger.info("✅ Ma'lumotlar bazasi tayyor")
     
-    # Buyruqlarni o'rnatish
-    await set_commands()
-    logger.info("✅ Buyruqlar o'rnatildi")
+    # Bot UI ni sozlash (Buyruqlar va Menu knopkasi)
+    await setup_bot_ui()
+    logger.info("✅ Bot UI (Menu button) sozlandi")
     
     # Botni ishga tushirish
     logger.info("🚀 Bot ishga tushdi!")
