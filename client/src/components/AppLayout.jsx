@@ -31,7 +31,7 @@ export default function AppLayout({ tgUser, user }) {
         navItems.push({ to: '/admin', icon: Shield, label: 'Admin' });
     }
 
-    const isTwa = !!tgUser; // Telegram Mini App flag
+    const isTwa = typeof window !== 'undefined' && window.Telegram?.WebApp?.platform && window.Telegram.WebApp.platform !== 'unknown';
 
     return (
         <div className="min-h-screen pb-20 sm:pb-0" style={{ backgroundColor: '#f0f5f2' }}>
@@ -146,10 +146,10 @@ export default function AppLayout({ tgUser, user }) {
                             {i18n.language.toUpperCase()}
                         </button>
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-forest-200 flex items-center justify-center font-bold text-sm bg-forest-50 text-forest-700 shadow-sm cursor-pointer" onClick={() => navigate('/profile')}>
-                            {tgUser?.photo_url ? (
-                                <img src={tgUser.photo_url} alt={tgUser.first_name} className="w-full h-full object-cover" />
+                            {(user?.avatar || tgUser?.photo_url) ? (
+                                <img src={user?.avatar || tgUser?.photo_url} alt="User" className="w-full h-full object-cover" />
                             ) : (
-                                <span>{tgUser?.first_name?.charAt(0) || 'U'}</span>
+                                <span>{(user?.name || tgUser?.first_name)?.charAt(0) || 'U'}</span>
                             )}
                         </div>
                     </div>
