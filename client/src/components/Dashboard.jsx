@@ -15,6 +15,7 @@ export default function Dashboard({ tgUser }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showTxModal, setShowTxModal] = useState(false);
+    const [txInitialData, setTxInitialData] = useState({});
 
     // Summary Data States
     const [debtData, setDebtData] = useState({ debts: [], stats: {} });
@@ -107,7 +108,7 @@ export default function Dashboard({ tgUser }) {
 
     return (
         <>
-            <AddTransactionModal isOpen={showTxModal} onClose={() => setShowTxModal(false)} onSuccess={fetchData} />
+            <AddTransactionModal isOpen={showTxModal} onClose={() => { setShowTxModal(false); setTxInitialData({}); }} onSuccess={fetchData} initialData={txInitialData} />
 
             <div className="space-y-6 animate-in fade-in duration-500 pb-20">
 
@@ -125,8 +126,10 @@ export default function Dashboard({ tgUser }) {
                 <div className="grid grid-cols-4 gap-2 sm:gap-4">
                     {/* 1. Add Transaction */}
                     <button
-                        onClick={() => setShowTxModal(true)}
-                        className="rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white"
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData('type', 'add')}
+                        onClick={() => { setTxInitialData({}); setShowTxModal(true); }}
+                        className="rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white cursor-grab active:cursor-grabbing"
                         style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 4px 12px rgba(26,77,58,0.2)' }}
                     >
                         <Plus size={24} className="sm:w-9 sm:h-9" strokeWidth={2.5} />
@@ -134,7 +137,18 @@ export default function Dashboard({ tgUser }) {
                     </button>
 
                     {/* 2. Balance */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
+                    <div
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData('type', 'wallet')}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                            if (e.dataTransfer.getData('type') === 'add') {
+                                e.preventDefault();
+                                setTxInitialData({ type: 'INCOME' });
+                                setShowTxModal(true);
+                            }
+                        }}
+                        className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition cursor-grab active:cursor-grabbing" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
                         <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-forest-600 bg-forest-50 mb-1 sm:mb-2">
                             <Wallet size={14} className="sm:w-4 sm:h-4" />
                         </div>
@@ -186,7 +200,16 @@ export default function Dashboard({ tgUser }) {
                                 <div
                                     key={cat.id}
                                     onClick={() => openCatModal(cat)}
-                                    className="bg-white rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group"
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => {
+                                        if (e.dataTransfer.getData('type') === 'wallet') {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setTxInitialData({ type: 'EXPENSE', categoryId: cat.id });
+                                            setShowTxModal(true);
+                                        }
+                                    }}
+                                    className="bg-white rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group border border-transparent hover:border-forest-200"
                                     style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.06)' }}
                                 >
                                     {/* Icon */}
