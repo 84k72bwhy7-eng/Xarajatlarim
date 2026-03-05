@@ -1,153 +1,138 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import auth from '../middleware/auth.js';
+import ExcelJS from 'exceljs';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Barcha API'lar uchun avtorizatsiya talab qilinadi
 router.use(auth);
 
-/**
- * 1. DAILY REPORT
- * Sum of income/expenses for the current day.
- */
-router.get('/daily', async (req, res) => {
+// GET /api/reports/excel
+router.get('/excel', async (req, res) => {
     try {
-        const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        const { month, year } = req.query;
+        // Default to current month/year if not provided
+        const m = parseInt(month) || new Date().getMonth() + 1;
+        const y = parseInt(year) || new Date().getFullYear();
+
+        const startDate = new Date(y, m - 1, 1);
+        const endDate = new Date(y, m, 0, 23, 59, 59);
+
+        // Fetch user to know their currency preference, although the amounts in the DB are already converted to base.
+        const user = await prisma.user.findUnique({
+            where: { id: req.userId },
+            select: { currency: true, name: true }
+        });
+        const currency = user?.currency || 'UZS';
 
         const transactions = await prisma.transaction.findMany({
             where: {
                 userId: req.userId,
-                date: {
-                    gte: startOfDay,
-                    lte: endOfDay
-                }
-            }
-        });
-
-        const income = transactions.filter(t => t.type === 'INCOME').reduce((acc, t) => acc + t.amount, 0);
-        const expense = transactions.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + t.amount, 0);
-
-        res.json({
-            date: startOfDay.toISOString().split('T')[0],
-            income,
-            expense,
-            netBalance: income - expense
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Serverda xatolik yuz berdi' });
-    }
-});
-
-/**
- * 2. WEEKLY REPORT WITH DAY-BY-DAY BREAKDOWN
- * Grouped data for the last 7 days.
- */
-router.get('/weekly', async (req, res) => {
-    try {
-        const endDay = new Date();
-        const startDay = new Date();
-        startDay.setDate(endDay.getDate() - 6);
-        startDay.setHours(0, 0, 0, 0);
-
-        const transactions = await prisma.transaction.findMany({
-            where: {
-                userId: req.userId,
-                date: {
-                    gte: startDay,
-                    lte: endDay
-                }
-            }
-        });
-
-        // Initialize last 7 days array
-        const dayByDay = [];
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(startDay);
-            d.setDate(d.getDate() + i);
-            const dateStr = d.toISOString().split('T')[0];
-            dayByDay.push({
-                date: dateStr,
-                dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
-                income: 0,
-                expense: 0
-            });
-        }
-
-        // Fill data
-        transactions.forEach(tx => {
-            const dateStr = new Date(tx.date).toISOString().split('T')[0];
-            const dayObj = dayByDay.find(d => d.date === dateStr);
-            if (dayObj) {
-                if (tx.type === 'INCOME') dayObj.income += tx.amount;
-                if (tx.type === 'EXPENSE') dayObj.expense += tx.amount;
-            }
-        });
-
-        const totalIncome = dayByDay.reduce((acc, d) => acc + d.income, 0);
-        const totalExpense = dayByDay.reduce((acc, d) => acc + d.expense, 0);
-
-        res.json({
-            period: `${startDay.toISOString().split('T')[0]} to ${endDay.toISOString().split('T')[0]}`,
-            totalIncome,
-            totalExpense,
-            netBalance: totalIncome - totalExpense,
-            breakdown: dayByDay
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Serverda xatolik yuz berdi' });
-    }
-});
-
-/**
- * 3. MONTHLY REPORT
- * Total monthly inflow vs outflow and a percentage breakdown of categories.
- */
-router.get('/monthly', async (req, res) => {
-    try {
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
-        const transactions = await prisma.transaction.findMany({
-            where: {
-                userId: req.userId,
-                date: {
-                    gte: startOfMonth,
-                    lte: endOfMonth
-                }
+                date: { gte: startDate, lte: endDate },
+                type: { in: ['INCOME', 'EXPENSE'] }
             },
-            include: { category: true }
+            include: { category: true, account: true },
+            orderBy: { date: 'asc' }
         });
 
-        const income = transactions.filter(t => t.type === 'INCOME').reduce((acc, t) => acc + t.amount, 0);
-        const expense = transactions.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + t.amount, 0);
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Xarajatlarim App';
+        workbook.created = new Date();
 
-        // Category breakdown for expenses
-        const categoryMap = {};
-        transactions.filter(t => t.type === 'EXPENSE').forEach(tx => {
-            const catName = tx.category?.name || 'Uncategorized';
-            categoryMap[catName] = (categoryMap[catName] || 0) + tx.amount;
+        const worksheet = workbook.addWorksheet(`${y}-${m.toString().padStart(2, '0')} Hisoboti`);
+
+        // Define columns
+        worksheet.columns = [
+            { header: 'Sana', key: 'date', width: 15 },
+            { header: 'Kategoriya', key: 'category', width: 25 },
+            { header: 'Hisob', key: 'account', width: 20 },
+            { header: 'Izoh', key: 'description', width: 30 },
+            { header: 'Turi', key: 'type', width: 15 },
+            { header: `Summa (${currency})`, key: 'amount', width: 20 },
+            { header: `Kiritilgan pul`, key: 'original_amount', width: 20 }
+        ];
+
+        // Style headers
+        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        worksheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF1A4D3A' } // Dark green
+        };
+
+        // Add rows
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        transactions.forEach(tx => {
+            const isIncome = tx.type === 'INCOME';
+            if (isIncome) totalIncome += tx.amount;
+            else totalExpense += tx.amount;
+
+            let origStr = tx.originalAmount ? `${tx.originalAmount} ${tx.originalCurrency || currency}` : '';
+
+            const row = worksheet.addRow({
+                date: new Date(tx.date).toLocaleDateString(),
+                category: tx.category?.name || '-',
+                account: tx.account?.name || '-',
+                description: tx.description || '-',
+                type: isIncome ? 'Daromad' : 'Xarajat',
+                amount: isIncome ? tx.amount : -tx.amount,
+                original_amount: origStr
+            });
+
+            // Color code amount cell based on type
+            row.getCell('amount').font = {
+                color: { argb: isIncome ? 'FF1E6142' : 'FF7D4E31' }
+            };
+            row.getCell('amount').numFmt = '#,##0.00';
+
+            // Highlight row background slightly if income
+            if (isIncome) {
+                row.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFF0FAF5' }
+                };
+            }
         });
 
-        const categoryBreakdown = Object.keys(categoryMap).map(category => ({
-            category,
-            total: categoryMap[category],
-            percentage: expense > 0 ? ((categoryMap[category] / expense) * 100).toFixed(2) + '%' : '0%'
-        })).sort((a, b) => b.total - a.total);
+        worksheet.addRow([]);
 
-        res.json({
-            month: now.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
-            totalIncome: income,
-            totalExpense: expense,
-            netBalance: income - expense,
-            categoryBreakdown
+        // Add totals
+        const totalRow = worksheet.addRow({
+            date: 'JAMI',
+            category: '',
+            account: '',
+            description: '',
+            type: '',
+            amount: totalIncome - totalExpense
         });
+
+        totalRow.font = { bold: true };
+        totalRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFDFF2EA' }
+        };
+        totalRow.getCell('amount').numFmt = '#,##0.00';
+
+        // Add summary at the bottom
+        worksheet.addRow([]);
+        worksheet.addRow(['Daromad:', totalIncome]).font = { color: { argb: 'FF1E6142' } };
+        worksheet.addRow(['Xarajat:', totalExpense]).font = { color: { argb: 'FF7D4E31' } };
+
+        // Set response headers for download
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=Hisobot_${y}_${m}.xlsx`);
+
+        await workbook.xlsx.write(res);
+        res.end();
+
     } catch (error) {
-        res.status(500).json({ error: 'Serverda xatolik yuz berdi' });
+        console.error('Report generation error:', error);
+        res.status(500).json({ error: 'Excel hisobotini yaratishda xatolik yuz berdi' });
     }
 });
 

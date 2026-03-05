@@ -67,6 +67,33 @@ export const getTransactions = (params) => api.get('/transactions', { params });
 export const createTransaction = (data) => api.post('/transactions', data);
 export const deleteTransaction = (id) => api.delete(`/transactions/${id}`);
 
+// Reports
+export const downloadExcelReport = async (month, year) => {
+    const token = localStorage.getItem('token');
+    const url = `${API_URL}/reports/excel?month=${month}&year=${year}`;
+
+    // Create an invisible link to trigger download since it's a file stream
+    const link = document.createElement('a');
+    link.href = url;
+
+    // We add token as a query param if using standard link download, OR handle via fetch
+    // Better way for authenticated downloads is fetch blob:
+    const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error('Yuklashda xato');
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    link.href = downloadUrl;
+    link.download = `Hisobot_${year}_${month}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+};
+
 // Categories
 export const getCategories = () => api.get(`/categories?t=${Date.now()}`);
 export const createCategory = (data) => api.post('/categories', data);

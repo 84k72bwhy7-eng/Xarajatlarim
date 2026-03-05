@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, CircleDollarSign, User, Shield, HandCoins, Target } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, LogOut, Globe, CircleDollarSign, User, Shield, HandCoins, Target, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { logout } from '../lib/api';
 
@@ -23,6 +23,7 @@ export default function AppLayout({ tgUser, user }) {
         { to: '/transactions', icon: ReceiptText, label: t('nav.transactions') },
         { to: '/debts', icon: HandCoins, label: t('nav.debts') },
         { to: '/goals', icon: Target, label: t('nav.goals') },
+        { to: '/reports', icon: Activity, label: 'Hisobotlar' },
         { to: '/budgets', icon: PieChart, label: t('nav.budget') },
     ];
 
