@@ -40,22 +40,43 @@ router.get('/summary', async (req, res) => {
             .filter(t => t.type === 'EXPENSE')
             .reduce((sum, t) => sum + t.amount, 0);
 
-        // 3. Kategoriya bo'yicha breakdown
-        const categoryBreakdown = {};
-        monthlyTransactions
-            .filter(t => t.type === 'EXPENSE')
-            .forEach(t => {
-                const catName = t.category?.name || 'Boshqa';
-                const catIcon = t.category?.icon || '💰';
-                const catColor = t.category?.color || '#64748b';
-                if (!categoryBreakdown[catName]) {
-                    categoryBreakdown[catName] = { name: catName, icon: catIcon, color: catColor, total: 0, count: 0 };
-                }
-                categoryBreakdown[catName].total += t.amount;
-                categoryBreakdown[catName].count += 1;
-            });
+        // 3. Kategoriyalar va har birining sarfi (barcha EXPENSE kategoriyalari uchun)
+        const categoriesData = await prisma.category.findMany({
+            where: { userId: req.userId, type: 'EXPENSE' },
+            orderBy: { name: 'asc' }
+        });
 
-        const categories = Object.values(categoryBreakdown).sort((a, b) => b.total - a.total);
+        const categoriesSpent = categoriesData.map(cat => {
+            const spent = monthlyTransactions
+                .filter(t => t.categoryId === cat.id && t.type === 'EXPENSE')
+                .reduce((sum, t) => sum + t.amount, 0);
+            return {
+                id: cat.id,
+                name: cat.name,
+                icon: cat.icon,
+                color: cat.color,
+                monthlyLimit: cat.monthlyLimit || 0,
+                spentAmount: spent
+            };
+        });
+
+        // Boshqa (kategoriyasi o'chirilgan) xarajatlar uchun
+        const otherSpent = monthlyTransactions
+            .filter(t => !t.categoryId && t.type === 'EXPENSE')
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        if (otherSpent > 0) {
+            categoriesSpent.push({
+                id: 'other',
+                name: 'Boshqa',
+                icon: '💸',
+                color: '#64748b',
+                monthlyLimit: 0,
+                spentAmount: otherSpent
+            });
+        }
+
+        const categories = categoriesSpent.sort((a, b) => b.spentAmount - a.spentAmount);
 
         // 4. Last 6 months cashflow
         const cashflow = [];

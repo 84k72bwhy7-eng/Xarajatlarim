@@ -1,55 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Wallet, TrendingUp, TrendingDown,
-    ArrowUpRight, ArrowDownRight, CreditCard, Activity, Plus, Loader2, Leaf,
-    HandCoins, Target, ArrowDownLeft, ChevronRight
+    Plus, Wallet, HandCoins, Target, Trash2, Leaf
 } from 'lucide-react';
-import CashflowChart from './CashflowChart';
-import CategoryPieChart from './CategoryPieChart';
-import SafeToSpend from './SafeToSpend';
 import AddTransactionModal from './AddTransactionModal';
-import { getDashboardSummary, getDebts, getGoals } from '../lib/api';
-
-const StatCard = ({ title, amount, trend, icon: Icon, isPositive, variant = 'light' }) => {
-    const variants = {
-        forest: { bg: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', shadow: 'rgba(26,77,58,0.3)' },
-        earth: { bg: 'linear-gradient(135deg, #7d4e31 0%, #a06040 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', shadow: 'rgba(125,78,49,0.3)' },
-        sand: { bg: 'linear-gradient(135deg, #f5e6d0 0%, #e8d5b7 100%)', text: '#3b1a0a', sub: '#7d4e31', shadow: 'rgba(125,78,49,0.15)' },
-        light: { bg: '#ffffff', text: '#1a4d3a', sub: '#7d4e31', shadow: 'rgba(26,77,58,0.08)' },
-    };
-    const v = variants[variant];
-
-    return (
-        <div className="rounded-2xl p-5 flex items-center justify-between transition-all hover:scale-[1.02] duration-200"
-            style={{ background: v.bg, boxShadow: `0 8px 24px ${v.shadow}`, color: v.text }}>
-            <div>
-                <p className="text-sm font-medium mb-1" style={{ color: v.sub }}>{title}</p>
-                <h4 className="text-2xl font-bold" style={{ color: v.text }}>${Number(amount || 0).toLocaleString()}</h4>
-                {trend !== undefined && (
-                    <div className="flex items-center gap-1 mt-2 text-sm">
-                        <span className="flex items-center font-medium" style={{ color: isPositive ? (variant === 'light' ? '#2d7a55' : 'rgba(255,255,255,0.9)') : '#ef4444' }}>
-                            {isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                            {Math.abs(trend)}%
-                        </span>
-                    </div>
-                )}
-            </div>
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                style={{ backgroundColor: variant === 'light' ? '#f0faf5' : 'rgba(255,255,255,0.18)', color: variant === 'light' ? '#1a4d3a' : 'white' }}>
-                <Icon size={22} />
-            </div>
-        </div>
-    );
-};
+import { getDashboardSummary, getDebts, getGoals, createCategory, updateCategory, deleteCategory } from '../lib/api';
 
 export default function Dashboard({ tgUser }) {
     const { t } = useTranslation();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
+    const [showTxModal, setShowTxModal] = useState(false);
+
+    // Summary Data States
     const [debtData, setDebtData] = useState({ debts: [], stats: {} });
     const [goalData, setGoalData] = useState({ goals: [], stats: {} });
+
+    // Category Modal States
+    const [isCatModalOpen, setIsCatModalOpen] = useState(false);
+    const [editingCategory, setEditingCategory] = useState(null);
+    const [catForm, setCatForm] = useState({ name: '', icon: '💰', color: '#1a4d3a', monthlyLimit: 0 });
 
     const fetchData = useCallback(async () => {
         try {
@@ -71,12 +41,50 @@ export default function Dashboard({ tgUser }) {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
+    // Category CRUD
+    const handleCatSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const payload = { ...catForm, type: 'EXPENSE' };
+            if (editingCategory) {
+                await updateCategory(editingCategory.id, payload);
+            } else {
+                await createCategory(payload);
+            }
+            setIsCatModalOpen(false);
+            fetchData();
+        } catch (err) {
+            alert('Xatolik yuz berdi');
+        }
+    };
+
+    const handleCatDelete = async (id) => {
+        if (!confirm("O'chirmoqchimisiz?")) return;
+        try {
+            await deleteCategory(id);
+            setIsCatModalOpen(false);
+            fetchData();
+        } catch (err) {
+            alert('O\'chirishda xato yuz berdi');
+        }
+    };
+
+    const openCatModal = (cat = null) => {
+        if (cat) {
+            setEditingCategory(cat);
+            setCatForm({ name: cat.name, icon: cat.icon, color: cat.color, monthlyLimit: cat.monthlyLimit || 0 });
+        } else {
+            setEditingCategory(null);
+            setCatForm({ name: '', icon: '💰', color: '#7d4e31', monthlyLimit: 0 });
+        }
+        setIsCatModalOpen(true);
+    };
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: '#1a4d3a' }}>
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: '#1a4d3a' }}>
                         <Leaf size={28} className="text-white animate-pulse" />
                     </div>
                     <p className="font-medium" style={{ color: '#2d7a55' }}>{t('app.loading')}</p>
@@ -85,185 +93,233 @@ export default function Dashboard({ tgUser }) {
         );
     }
 
-    const d = data || { netWorth: 0, monthly: { income: 0, expense: 0, balance: 0 }, categoryBreakdown: [], cashflow: [], recentTransactions: [], safeToSpend: null };
+    const d = data || { netWorth: 0, categoryBreakdown: [] };
     const userName = tgUser?.first_name || JSON.parse(localStorage.getItem('user') || '{}')?.name || '';
+    const activeGoalsCount = goalData.goals?.filter(g => !g.isCompleted).length || 0;
 
     return (
         <>
-            <AddTransactionModal isOpen={showModal} onClose={() => setShowModal(false)} onSuccess={fetchData} />
-            <div className="space-y-6 animate-in fade-in duration-500">
+            <AddTransactionModal isOpen={showTxModal} onClose={() => setShowTxModal(false)} onSuccess={fetchData} />
 
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold" style={{ color: '#1a4d3a' }}>{t('nav.dashboard')}</h1>
-                        {userName && (
-                            <p className="text-sm mt-0.5" style={{ color: '#7d4e31' }}>
-                                {t('dashboard.welcome', { name: userName })}
-                            </p>
-                        )}
-                    </div>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition hover:opacity-90 active:scale-95"
-                        style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 4px 12px rgba(26,77,58,0.35)' }}
-                    >
-                        <Plus size={18} />
-                        {t('transactions.addTransaction')}
-                    </button>
+            <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+
+                {/* Header Welcome */}
+                <div>
+                    <h1 className="text-2xl font-bold" style={{ color: '#1a4d3a' }}>{t('nav.dashboard')}</h1>
+                    {userName && (
+                        <p className="text-sm mt-0.5" style={{ color: '#7d4e31' }}>
+                            {t('dashboard.welcome', { name: userName })}
+                        </p>
+                    )}
                 </div>
 
-                {/* Stat Cards */}
+                {/* 1) TOP 4 BLOCKS GRID */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard title={t('dashboard.netWorth')} amount={d.netWorth} trend={2.4} isPositive={true} icon={Wallet} variant="forest" />
-                    <StatCard title={t('dashboard.monthlyIncome')} amount={d.monthly.income} trend={3.1} isPositive={true} icon={TrendingUp} variant="light" />
-                    <StatCard title={t('dashboard.monthlyExpense')} amount={d.monthly.expense} trend={1.5} isPositive={false} icon={TrendingDown} variant="earth" />
-                    <StatCard title={t('dashboard.safeToSpend')} amount={d.monthly.balance} trend={12.5} isPositive={d.monthly.balance >= 0} icon={CreditCard} variant="sand" />
-                </div>
+                    {/* 1. Add Transaction */}
+                    <button
+                        onClick={() => setShowTxModal(true)}
+                        className="rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white"
+                        style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 8px 24px rgba(26,77,58,0.3)' }}
+                    >
+                        <Plus size={36} strokeWidth={2.5} />
+                        <span className="font-bold text-sm tracking-wide text-center leading-tight">Tranzaksiya qo'shish</span>
+                    </button>
 
-                {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
-                        <CashflowChart data={d.cashflow} />
-
-                        {/* Recent Transactions */}
-                        <div className="rounded-2xl p-6" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
-                            <div className="flex justify-between items-center mb-5">
-                                <h3 className="text-base font-bold flex items-center gap-2" style={{ color: '#1a4d3a' }}>
-                                    <span className="w-2 h-6 rounded-full inline-block" style={{ backgroundColor: '#1a4d3a' }}></span>
-                                    {t('dashboard.recentTransactions')}
-                                </h3>
-                                <a href="/transactions" className="text-sm font-medium hover:opacity-70 transition" style={{ color: '#2d7a55' }}>
-                                    {t('dashboard.viewAll')}
-                                </a>
+                    {/* 2. Balance */}
+                    <div className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition" style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Hisobim</span>
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-forest-600 bg-forest-50">
+                                <Wallet size={16} />
                             </div>
-
-                            {d.recentTransactions.length === 0 ? (
-                                <div className="py-10 text-center">
-                                    <Activity size={36} className="mx-auto mb-3 opacity-20" style={{ color: '#1a4d3a' }} />
-                                    <p className="text-sm" style={{ color: '#7d4e31' }}>{t('dashboard.noTransactions')}</p>
-                                    <button onClick={() => setShowModal(true)} className="mt-3 text-sm font-medium hover:opacity-70" style={{ color: '#2d7a55' }}>
-                                        + {t('transactions.addTransaction')}
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="divide-y" style={{ borderColor: '#f0faf5' }}>
-                                    {d.recentTransactions.map((tx) => (
-                                        <div key={tx.id} className="py-3 flex items-center justify-between hover:bg-[#f0faf5] rounded-xl px-2 -mx-2 transition">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg"
-                                                    style={{ backgroundColor: `${tx.category?.color || '#2d7a55'}18` }}>
-                                                    {tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸')}
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{tx.description || tx.category?.name || '-'}</p>
-                                                    <p className="text-xs" style={{ color: '#7d4e31' }}>{tx.category?.name}</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className={`text-sm font-bold`} style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
-                                                    {tx.type === 'INCOME' ? '+' : '-'}${Number(tx.amount).toLocaleString()}
-                                                </p>
-                                                <p className="text-xs" style={{ color: '#a06040' }}>{new Date(tx.date).toLocaleDateString()}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                         </div>
+                        <h3 className="text-2xl font-black text-forest-900">${d.netWorth.toLocaleString()}</h3>
                     </div>
 
-                    {/* Right column */}
-                    <div className="space-y-6">
-                        {/* Debts Widget */}
-                        <div className="rounded-2xl p-5" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-base font-bold flex items-center gap-2" style={{ color: '#1a4d3a' }}>
-                                    <HandCoins size={18} />
-                                    {t('debts.title')}
-                                </h3>
-                                <a href="/debts" className="text-xs font-medium flex items-center gap-0.5 hover:opacity-70 transition" style={{ color: '#2d7a55' }}>
-                                    {t('debts.viewAll')} <ChevronRight size={14} />
-                                </a>
+                    {/* 3. Debts */}
+                    <a href="/debts" className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition block" style={{ boxShadow: '0 4px 16px rgba(125,78,49,0.08)' }}>
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">{t('debts.title')}</span>
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-red-500 bg-red-50">
+                                <HandCoins size={16} />
                             </div>
-                            {(debtData.debts || []).filter(d => !d.isPaid).length === 0 ? (
-                                <p className="text-sm text-center py-4" style={{ color: '#7d4e31' }}>{t('debts.noDebts')}</p>
-                            ) : (
-                                <div className="space-y-2">
-                                    <div className="grid grid-cols-2 gap-2 mb-3">
-                                        <div className="bg-red-50 rounded-xl p-3 text-center">
-                                            <p className="text-xs text-red-400">{t('debts.iGave')}</p>
-                                            <p className="text-lg font-bold text-red-600">{Number(debtData.stats?.totalGivenRemaining || 0).toLocaleString()}</p>
-                                        </div>
-                                        <div className="bg-green-50 rounded-xl p-3 text-center">
-                                            <p className="text-xs text-green-400">{t('debts.iTook')}</p>
-                                            <p className="text-lg font-bold text-green-600">{Number(debtData.stats?.totalTakenRemaining || 0).toLocaleString()}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                            <p className="text-red-500 font-bold text-xs sm:text-sm">{t('debts.iGave')}: ${Number(debtData.stats?.totalGivenRemaining || 0).toLocaleString()}</p>
+                            <p className="text-forest-600 font-bold text-xs sm:text-sm">{t('debts.iTook')}: ${Number(debtData.stats?.totalTakenRemaining || 0).toLocaleString()}</p>
+                        </div>
+                    </a>
+
+                    {/* 4. Goals */}
+                    <a href="/goals" className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition block" style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.08)' }}>
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">{t('goals.title')}</span>
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-amber-500 bg-amber-50">
+                                <Target size={16} />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-2xl font-black text-forest-900">{activeGoalsCount}</p>
+                            <p className="text-xs font-semibold text-slate-400 mt-0.5">Faolmaqsadlar</p>
+                        </div>
+                    </a>
+                </div>
+
+                {/* 2) CATEGORIES GRID */}
+                <div className="pt-2">
+                    <h2 className="text-lg font-bold text-forest-900 mb-4 flex items-center gap-2">
+                        <span className="w-1.5 h-5 rounded-full" style={{ backgroundColor: '#7d4e31' }}></span>
+                        Kategoriyalar va Limitlar
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {d.categoryBreakdown.map(cat => {
+                            if (cat.id === 'other') return null;
+
+                            const limit = cat.monthlyLimit || 0;
+                            const spent = cat.spentAmount || 0;
+                            const isOver = limit > 0 && spent > limit;
+                            const progress = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
+
+                            return (
+                                <div
+                                    key={cat.id}
+                                    onClick={() => openCatModal(cat)}
+                                    className="bg-white rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group"
+                                    style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.06)' }}
+                                >
+                                    {/* Icon */}
+                                    <div className="flex items-center justify-between mb-3 w-full">
+                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
+                                            {cat.icon}
                                         </div>
                                     </div>
-                                    {(debtData.debts || []).filter(d => !d.isPaid).slice(0, 3).map(debt => (
-                                        <div key={debt.id} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-forest-50 transition">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs ${debt.type === 'GIVEN' ? 'bg-red-400' : 'bg-green-500'}`}>
-                                                    {debt.type === 'GIVEN' ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{debt.personName}</p>
-                                                    <p className="text-[10px] text-slate-400">{debt.type === 'GIVEN' ? t('debts.iGave') : t('debts.iTook')}</p>
-                                                </div>
-                                            </div>
-                                            <p className="text-sm font-bold" style={{ color: '#1a4d3a' }}>{Number(debt.amount - debt.paidAmount).toLocaleString()}</p>
+
+                                    <h4 className="font-bold text-forest-900 leading-tight mb-2 truncate text-sm sm:text-base">{cat.name}</h4>
+
+                                    {/* Amount Details */}
+                                    <div className="flex items-end justify-between font-medium text-xs mb-2">
+                                        <span className={`font-bold text-sm ${isOver ? 'text-red-500' : 'text-forest-700'}`}>
+                                            ${spent.toLocaleString()}
+                                        </span>
+                                        <span className="text-slate-400">/ ${limit > 0 ? limit.toLocaleString() : '∞'}</span>
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    {limit > 0 && (
+                                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-700 ${isOver ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-forest-500'}`}
+                                                style={{ width: `${Math.max(progress, 3)}%` }}
+                                            />
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                    )}
 
-                        {/* Goals Widget */}
-                        <div className="rounded-2xl p-5" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 16px rgba(125,78,49,0.08)' }}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-base font-bold flex items-center gap-2" style={{ color: '#7d4e31' }}>
-                                    <Target size={18} />
-                                    {t('goals.title')}
-                                </h3>
-                                <a href="/goals" className="text-xs font-medium flex items-center gap-0.5 hover:opacity-70 transition" style={{ color: '#a06040' }}>
-                                    {t('goals.viewAll')} <ChevronRight size={14} />
-                                </a>
+                                    {/* Warning text */}
+                                    {isOver && (
+                                        <p className="text-[10px] text-red-500 mt-2 font-bold animate-pulse">
+                                            Limitdan oshdi! (-${(spent - limit).toLocaleString()})
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* + Add Category Card */}
+                        <div
+                            onClick={() => openCatModal()}
+                            className="bg-slate-50/50 rounded-2xl p-4 border border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-earth-400 transition-all min-h-[160px] group"
+                        >
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white mb-3 shadow-md transition-transform group-hover:scale-110" style={{ backgroundColor: '#7d4e31' }}>
+                                <Plus size={24} strokeWidth={3} />
                             </div>
-                            {(goalData.goals || []).filter(g => !g.isCompleted).length === 0 ? (
-                                <p className="text-sm text-center py-4" style={{ color: '#7d4e31' }}>{t('goals.noGoals')}</p>
-                            ) : (
-                                <div className="space-y-3">
-                                    {(goalData.goals || []).filter(g => !g.isCompleted).slice(0, 3).map(goal => {
-                                        const progress = goal.targetAmount > 0 ? Math.min(Math.round((goal.savedAmount / goal.targetAmount) * 100), 100) : 0;
-                                        return (
-                                            <div key={goal.id} className="group">
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-lg">{goal.icon}</span>
-                                                        <span className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{goal.name}</span>
-                                                    </div>
-                                                    <span className="text-xs font-bold" style={{ color: goal.color }}>{progress}%</span>
-                                                </div>
-                                                <div className="w-full h-2 bg-forest-50 rounded-full overflow-hidden">
-                                                    <div className="h-full rounded-full transition-all duration-700"
-                                                        style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${goal.color}, ${goal.color}cc)` }} />
-                                                </div>
-                                                <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
-                                                    <span>{Number(goal.savedAmount).toLocaleString()}</span>
-                                                    <span>{Number(goal.targetAmount).toLocaleString()}</span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                            <span className="text-sm font-bold text-slate-500 group-hover:text-earth-600 transition-colors">Qo'shish</span>
                         </div>
-
-                        {d.safeToSpend && <SafeToSpend data={d.safeToSpend} />}
-                        {d.categoryBreakdown.length > 0 && <CategoryPieChart data={d.categoryBreakdown} />}
                     </div>
                 </div>
             </div>
+
+            {/* Category Modal (Dashboard) */}
+            {isCatModalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-5">
+                            <h3 className="text-xl font-bold text-forest-900">
+                                {editingCategory ? 'Tahrirlash' : 'Yangi kategoriya'}
+                            </h3>
+                            {editingCategory && (
+                                <button type="button" onClick={() => handleCatDelete(editingCategory.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition">
+                                    <Trash2 size={20} />
+                                </button>
+                            )}
+                        </div>
+
+                        <form onSubmit={handleCatSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-forest-800 mb-1.5">Nomi</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={catForm.name}
+                                    onChange={e => setCatForm(c => ({ ...c, name: e.target.value }))}
+                                    className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-forest-800 mb-1.5">Oylik Limit ($)</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={catForm.monthlyLimit}
+                                    onChange={e => setCatForm(c => ({ ...c, monthlyLimit: e.target.value }))}
+                                    className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium font-mono"
+                                    placeholder="0 - limitsiz"
+                                />
+                                <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-tight">Ushbu turkumda oyiga qancha pul sarflashni reja qilyapsiz? 0 qilsangiz limit tekshirilmaydi.</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">Ikonka</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={catForm.icon}
+                                        onChange={e => setCatForm(c => ({ ...c, icon: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl text-center text-2xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">Rang</label>
+                                    <input
+                                        type="color"
+                                        value={catForm.color}
+                                        onChange={e => setCatForm(c => ({ ...c, color: e.target.value }))}
+                                        className="w-full h-[54px] p-1.5 bg-forest-50 border border-forest-100 rounded-xl outline-none cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCatModalOpen(false)}
+                                    className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-95 text-forest-800 bg-forest-50 hover:bg-forest-100"
+                                >
+                                    Bekor qilish
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95 hover:opacity-90 shadow-lg"
+                                    style={{ backgroundColor: '#7d4e31' }}
+                                >
+                                    Saqlash
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

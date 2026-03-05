@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
 // POST /api/categories
 router.post('/', async (req, res) => {
     try {
-        const { name, icon, color, type } = req.body;
+        const { name, icon, color, type, monthlyLimit } = req.body;
         if (!name || !type) return res.status(400).json({ error: 'name va type kerak' });
 
         const category = await prisma.category.create({
@@ -34,6 +34,7 @@ router.post('/', async (req, res) => {
                 icon: icon || '📦',
                 color: color || '#2d7a55',
                 type: type || 'EXPENSE',
+                monthlyLimit: monthlyLimit ? parseFloat(monthlyLimit) : 0,
                 userId: req.userId,
             },
         });
@@ -49,7 +50,7 @@ router.post('/', async (req, res) => {
 // PUT /api/categories/:id
 router.put('/:id', async (req, res) => {
     try {
-        const { name, icon, color, type } = req.body;
+        const { name, icon, color, type, monthlyLimit } = req.body;
 
         // Foydalanuvchi o'z kategoriyasini tahrirlashi kerak
         const existing = await prisma.category.findFirst({
@@ -64,6 +65,7 @@ router.put('/:id', async (req, res) => {
                 ...(icon && { icon }),
                 ...(color && { color }),
                 ...(type && { type }),
+                ...(monthlyLimit !== undefined && { monthlyLimit: parseFloat(monthlyLimit) }),
             },
         });
         res.json(updated);

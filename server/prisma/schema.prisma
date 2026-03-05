@@ -73,11 +73,12 @@ model Category {
   id       String       @id @default(cuid())
   name     String
   nameRu   String?
-  icon     String       @default("📦")
-  color    String       @default("#8b5cf6")
-  type     CategoryType @default(EXPENSE)
-  parentId String?
-  userId   String
+  icon         String       @default("📦")
+  color        String       @default("#8b5cf6")
+  type         CategoryType @default(EXPENSE)
+  monthlyLimit Float?       @default(0)
+  parentId     String?
+  userId       String
 
   parent   Category?  @relation("SubCategories", fields: [parentId], references: [id])
   children Category[] @relation("SubCategories")

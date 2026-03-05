@@ -28,7 +28,7 @@ export default function ProfilePage() {
     // CRUD States
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
-    const [categoryForm, setCategoryForm] = useState({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a' });
+    const [categoryForm, setCategoryForm] = useState({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a', monthlyLimit: 0 });
 
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
     const [editingAccount, setEditingAccount] = useState(null);
@@ -182,7 +182,7 @@ export default function ProfilePage() {
             }
             setIsCategoryModalOpen(false);
             setEditingCategory(null);
-            setCategoryForm({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a' });
+            setCategoryForm({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a', monthlyLimit: 0 });
             loadData();
         } catch (err) {
             alert('Kategoriyani saqlashda xato');
@@ -201,7 +201,7 @@ export default function ProfilePage() {
 
     const openEditCategory = (cat) => {
         setEditingCategory(cat);
-        setCategoryForm({ name: cat.name, icon: cat.icon, type: cat.type, color: cat.color });
+        setCategoryForm({ name: cat.name, icon: cat.icon, type: cat.type, color: cat.color, monthlyLimit: cat.monthlyLimit || 0 });
         setIsCategoryModalOpen(true);
     };
 
@@ -348,7 +348,7 @@ export default function ProfilePage() {
                         <button
                             onClick={() => {
                                 setEditingCategory(null);
-                                setCategoryForm({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a' });
+                                setCategoryForm({ name: '', icon: '💰', type: 'EXPENSE', color: '#1a4d3a', monthlyLimit: 0 });
                                 setIsCategoryModalOpen(true);
                             }}
                             className="p-2 text-white rounded-xl shadow-lg transition-all hover:scale-110 active:scale-95"
@@ -505,6 +505,19 @@ export default function ProfilePage() {
                                     className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none"
                                 />
                             </div>
+                            {categoryForm.type === 'EXPENSE' && (
+                                <div>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1">Oylik Limit ($)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={categoryForm.monthlyLimit}
+                                        onChange={e => setCategoryForm(c => ({ ...c, monthlyLimit: e.target.value }))}
+                                        className="w-full px-4 py-2.5 bg-forest-50 border border-forest-100 rounded-xl outline-none"
+                                        placeholder="0 - limitsiz"
+                                    />
+                                </div>
+                            )}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-bold text-forest-800 mb-1">Ikonka</label>
