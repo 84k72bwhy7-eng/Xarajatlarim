@@ -117,7 +117,7 @@ async def main():
     await setup_bot_ui()
     
     # Eslatmalarni rejalashtirish (Har kuni 22:00)
-    scheduler = AsyncioScheduler(timezone="Asia/Tashkent")
+    scheduler = AsyncIOScheduler(timezone="Asia/Tashkent")
     scheduler.add_job(send_daily_reminders, 'cron', hour=22, minute=0, args=[bot])
     scheduler.start()
     logger.info("✅ 22:00 dagi eslatma rejalashtirildi")
