@@ -22,6 +22,7 @@ function App() {
   const [tgUser, setTgUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || 'null'));
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     // 1. TWA initializatsiyasi
@@ -31,10 +32,15 @@ function App() {
       // Agar TWA bo'lsa, avtomatik login qildirish
       loginWithTelegram()
         .then((res) => {
-          setIsAuthenticated(true);
-          setUser(res.user);
+          if (res) {
+            setIsAuthenticated(true);
+            setUser(res.user);
+          }
         })
-        .catch(err => console.error("TWA Login xatosi:", err));
+        .catch(err => console.error("TWA Login xatosi:", err))
+        .finally(() => setIsInitializing(false));
+    } else {
+      setIsInitializing(false);
     }
 
     // 2. Token o'zgarganini kuzatish (Login page dan keyin)
@@ -53,10 +59,19 @@ function App() {
     };
   }, []);
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0d2b1e 0%, #1a4d3a 50%, #1e6142 100%)' }}>
+        <p className="text-white">Yuklanmoqda...</p>
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<AuthPage />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />} />
 
         <Route
           path="/"
