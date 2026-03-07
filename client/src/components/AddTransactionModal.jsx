@@ -50,7 +50,9 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
             getAccounts().then(r => {
                 const accs = r.data || [];
                 setAccounts(accs);
-                if (accs.length > 0) {
+                if (initialData.accountId && accs.some(a => a.id === initialData.accountId)) {
+                    setForm(prev => ({ ...prev, account: initialData.accountId }));
+                } else if (accs.length > 0) {
                     setForm(prev => ({ ...prev, account: accs[0].id }));
                 }
             }).catch(() => { });

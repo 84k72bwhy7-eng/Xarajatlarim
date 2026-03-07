@@ -210,50 +210,45 @@ export default function Dashboard({ tgUser }) {
 
                 {/* Top Row: Accounts (Horizontal Scroll) */}
                 <div className="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 scrollbar-hide snap-x">
-                    {/* 1. Hisobim (General Balance) */}
-                    <div
-                        draggable
-                        onDragStart={(e) => e.dataTransfer.setData('type', 'wallet')}
-                        onTouchStart={(e) => handleTouchStart(e, 'wallet', t('dashboard.balance'), <Wallet size={20} />)}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                            if (e.dataTransfer.getData('type') === 'add') {
-                                e.preventDefault();
-                                setTxInitialData({ type: 'INCOME' });
-                                setShowTxModal(true);
-                            }
-                        }}
-                        data-drop-target
-                        data-drop-type="wallet"
-                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing touch-none min-w-[140px] snap-start"
-                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-                    >
-                        <span className="text-xs font-semibold text-slate-500">{t('dashboard.balance')}</span>
-                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>{formatCurrency(d.netWorth)}</p>
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#e8f5e9' }}>
-                            <Wallet size={18} style={{ color: '#2d7a55' }} />
-                        </div>
-                    </div>
-
                     {/* Individual Accounts */}
                     {accounts.map(acc => (
                         <div
                             key={acc.id}
-                            className="bg-white rounded-2xl p-4 flex flex-col gap-2 transition-all min-w-[140px] snap-start"
+                            draggable
+                            onDragStart={(e) => {
+                                e.dataTransfer.setData('type', 'wallet');
+                                e.dataTransfer.setData('accountId', acc.id);
+                            }}
+                            onTouchStart={(e) => handleTouchStart(e, 'wallet', acc.name, <Wallet size={20} />)}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                                if (e.dataTransfer.getData('type') === 'add') {
+                                    e.preventDefault();
+                                    setTxInitialData({ type: 'INCOME', accountId: acc.id });
+                                    setShowTxModal(true);
+                                }
+                            }}
+                            data-drop-target
+                            data-drop-type="wallet"
+                            className="bg-white rounded-2xl p-3 flex flex-col gap-1 transition-all cursor-grab active:cursor-grabbing touch-none min-w-[105px] max-w-[130px] flex-1 snap-start relative overflow-hidden"
                             style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
                         >
-                            <span className="text-xs font-semibold text-slate-500 truncate">{acc.name}</span>
-                            <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>{formatCurrency(acc.balance)}</p>
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: `${acc.color}15` }}>
-                                <span className="text-lg">{acc.icon || '💳'}</span>
+                            <span className="text-xs font-semibold text-slate-500 truncate z-10">{acc.name}</span>
+                            <p className="text-sm sm:text-base font-black truncate z-10" style={{ color: '#1a4d3a' }}>{formatCurrency(acc.balance)}</p>
+
+                            {/* Icon rendering logic */}
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center mt-2 z-10" style={{ backgroundColor: `${acc.color || '#2d7a55'}15` }}>
+                                {acc.icon === 'wallet' ? <Wallet size={16} style={{ color: acc.color || '#2d7a55' }} /> : (
+                                    <span className="text-base">{acc.icon && acc.icon !== 'wallet' ? acc.icon : <Wallet size={16} style={{ color: acc.color || '#2d7a55' }} />}</span>
+                                )}
                             </div>
                         </div>
                     ))}
 
                     {/* Add Account Button */}
-                    <a href="/profile" className="bg-slate-50/50 rounded-2xl p-4 border border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all min-w-[120px] snap-start group">
+                    <a href="/profile" className="bg-slate-50/50 rounded-2xl p-3 border border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all min-w-[105px] max-w-[130px] flex-1 snap-start group">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white mb-2 transition-transform group-hover:scale-110" style={{ backgroundColor: '#2d7a55' }}>
                             <Plus size={18} strokeWidth={3} />
                         </div>
@@ -298,7 +293,8 @@ export default function Dashboard({ tgUser }) {
                                         if (e.dataTransfer.getData('type') === 'wallet') {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            setTxInitialData({ type: 'EXPENSE', categoryId: cat.id });
+                                            const accountId = e.dataTransfer.getData('accountId');
+                                            setTxInitialData({ type: 'EXPENSE', categoryId: cat.id, accountId });
                                             setShowTxModal(true);
                                         }
                                     }}
