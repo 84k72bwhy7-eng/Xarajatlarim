@@ -266,8 +266,13 @@ export default function Dashboard({ tgUser }) {
                 <div className="pt-2 relative">
                     {/* FAB Add Transaction Button */}
                     <button
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData('type', 'add')}
+                        onTouchStart={(e) => handleTouchStart(e, 'add', t('transactions.addTransaction'), <Plus size={20} />)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         onClick={() => { setTxInitialData({}); setShowTxModal(true); }}
-                        className="absolute -top-5 right-0 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl z-10 transition-all hover:scale-110 active:scale-95"
+                        className="absolute -top-5 right-0 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl z-10 transition-all hover:scale-110 active:scale-95 cursor-grab active:cursor-grabbing touch-none"
                         style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 6px 20px rgba(26,77,58,0.35)' }}
                     >
                         <Plus size={28} strokeWidth={2.5} />
