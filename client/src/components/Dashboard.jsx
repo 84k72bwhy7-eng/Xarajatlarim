@@ -8,7 +8,7 @@ import CashflowChart from './CashflowChart';
 import CategoryPieChart from './CategoryPieChart';
 import SafeToSpend from './SafeToSpend';
 import AddTransactionModal from './AddTransactionModal';
-import { getDashboardSummary, getDebts, getGoals, createCategory, updateCategory, deleteCategory } from '../lib/api';
+import { getDashboardSummary, getDebts, getGoals, getAccounts, createCategory, updateCategory, deleteCategory } from '../lib/api';
 import { formatCurrency } from '../lib/format';
 
 export default function Dashboard({ tgUser }) {
