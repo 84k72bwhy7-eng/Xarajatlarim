@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Plus, Wallet, HandCoins, Target, Trash2, Leaf,
-    Activity, ArrowUpRight, ArrowDownLeft, ChevronRight
+    Activity, ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronDown, Globe
 } from 'lucide-react';
 import CashflowChart from './CashflowChart';
 import CategoryPieChart from './CategoryPieChart';
@@ -12,7 +12,7 @@ import { getDashboardSummary, getDebts, getGoals, createCategory, updateCategory
 import { formatCurrency } from '../lib/format';
 
 export default function Dashboard({ tgUser }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showTxModal, setShowTxModal] = useState(false);
@@ -166,34 +166,47 @@ export default function Dashboard({ tgUser }) {
 
             <div className="space-y-6 animate-in fade-in duration-500 pb-20">
 
-                {/* Header Welcome */}
-                <div>
-                    <h1 className="text-2xl font-bold" style={{ color: '#1a4d3a' }}>{t('nav.dashboard')}</h1>
-                    {userName && (
-                        <p className="text-sm mt-0.5" style={{ color: '#7d4e31' }}>
-                            {t('dashboard.welcome', { name: userName })}
-                        </p>
-                    )}
+                {/* Header: Avatar + Welcome + Language Toggle */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-forest-200 flex items-center justify-center font-bold text-base bg-forest-100 text-forest-700 shadow-sm cursor-pointer"
+                            onClick={() => window.location.href = '/profile'}>
+                            {(() => {
+                                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                                const photoUrl = user?.avatar || tgUser?.photo_url;
+                                if (photoUrl) {
+                                    return <img src={photoUrl} alt="User" className="w-full h-full object-cover" />;
+                                }
+                                return <span>{userName?.charAt(0) || 'U'}</span>;
+                            })()}
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold" style={{ color: '#1a4d3a' }}>
+                                {t('dashboard.welcome', { name: '' }).replace(',', '').trim()},
+                            </h1>
+                            <p className="text-lg font-bold" style={{ color: '#1a4d3a' }}>
+                                {userName}!
+                            </p>
+                        </div>
+                    </div>
+                    {/* Language toggle */}
+                    <button
+                        onClick={() => {
+                            const newLang = i18n.language === 'uz' ? 'ru' : 'uz';
+                            i18n.changeLanguage(newLang);
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold border transition-all"
+                        style={{ color: '#1a4d3a', borderColor: '#d0ddd4', backgroundColor: '#ffffff' }}
+                    >
+                        {i18n.language.toUpperCase()}
+                        <ChevronDown size={14} />
+                    </button>
                 </div>
 
-                {/* 1) TOP 4 BLOCKS GRID */}
-                <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                    {/* 1. Add Transaction */}
-                    <button
-                        draggable
-                        onDragStart={(e) => e.dataTransfer.setData('type', 'add')}
-                        onTouchStart={(e) => handleTouchStart(e, 'add', t('transactions.addTransaction'), <Plus size={20} />)}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        onClick={() => { setTxInitialData({}); setShowTxModal(true); }}
-                        className="rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all hover:scale-[1.02] active:scale-95 text-white cursor-grab active:cursor-grabbing touch-none"
-                        style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 4px 12px rgba(26,77,58,0.2)' }}
-                    >
-                        <Plus size={24} className="sm:w-9 sm:h-9" strokeWidth={2.5} />
-                        <span className="font-bold text-[9px] sm:text-sm tracking-wide text-center leading-tight truncate w-full">{t('transactions.addTransaction')}</span>
-                    </button>
-
-                    {/* 2. Balance */}
+                {/* 3 Summary Cards */}
+                <div className="grid grid-cols-3 gap-3">
+                    {/* 1. Hisobim (Balance) */}
                     <div
                         draggable
                         onDragStart={(e) => e.dataTransfer.setData('type', 'wallet')}
@@ -210,53 +223,67 @@ export default function Dashboard({ tgUser }) {
                         }}
                         data-drop-target
                         data-drop-type="wallet"
-                        className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition cursor-grab active:cursor-grabbing touch-none" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-forest-600 bg-forest-50 mb-1 sm:mb-2">
-                            <Wallet size={14} className="sm:w-4 sm:h-4" />
+                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all cursor-grab active:cursor-grabbing touch-none"
+                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                    >
+                        <span className="text-xs font-semibold text-slate-500">{t('dashboard.balance')}</span>
+                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>{formatCurrency(d.netWorth)}</p>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#e8f5e9' }}>
+                            <Wallet size={18} style={{ color: '#2d7a55' }} />
                         </div>
-                        <h3 className="text-sm sm:text-2xl font-black text-forest-900 truncate w-full">{formatCurrency(d.netWorth)}</h3>
-                        <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">{t('dashboard.balance')}</span>
                     </div>
 
-                    {/* 3. Debts */}
-                    <a href="/debts" className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition block" style={{ boxShadow: '0 4px 12px rgba(125,78,49,0.06)' }}>
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-red-500 bg-red-50 mb-1 sm:mb-2">
-                            <HandCoins size={14} className="sm:w-4 sm:h-4" />
-                        </div>
-                        <div className="flex flex-col items-center w-full">
-                            <p className="text-[10px] sm:text-sm text-red-500 font-bold truncate w-full">-{formatCurrency(debtData.stats?.totalGivenRemaining || 0)}</p>
-                            <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('debts.title')}</span>
+                    {/* 2. Qarzlar (Debts) */}
+                    <a href="/debts"
+                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all block"
+                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                    >
+                        <span className="text-xs font-semibold text-slate-500">{t('debts.title')}</span>
+                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>
+                            -{formatCurrency(debtData.stats?.totalGivenRemaining || 0)}
+                        </p>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#fff3e0' }}>
+                            <span className="text-lg">👋</span>
                         </div>
                     </a>
 
-                    {/* 4. Goals */}
-                    <a href="/goals" className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition block" style={{ boxShadow: '0 4px 12px rgba(26,77,58,0.06)' }}>
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-amber-500 bg-amber-50 mb-1 sm:mb-2">
-                            <Target size={14} className="sm:w-4 sm:h-4" />
-                        </div>
-                        <div className="flex flex-col items-center w-full">
-                            <p className="text-[10px] sm:text-sm font-black text-forest-900 truncate w-full">
-                                {formatCurrency(totalGoalCollected)} {totalGoalTarget > 0 ? `/ ${formatCurrency(totalGoalTarget)}` : ''}
-                            </p>
-                            <span className="text-[8px] sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider truncate w-full mt-0.5">{t('goals.title')}</span>
+                    {/* 3. Maqsadlar (Goals) */}
+                    <a href="/goals"
+                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all block"
+                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                    >
+                        <span className="text-xs font-semibold text-slate-500">{t('goals.title')}</span>
+                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>
+                            {totalGoalTarget > 0 ? formatCurrency(totalGoalCollected) : '0 UZS'}
+                        </p>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#fce4ec' }}>
+                            <Target size={18} style={{ color: '#e91e63' }} />
                         </div>
                     </a>
                 </div>
 
                 {/* 2) CATEGORIES GRID */}
-                <div className="pt-2">
+                <div className="pt-2 relative">
+                    {/* FAB Add Transaction Button */}
+                    <button
+                        onClick={() => { setTxInitialData({}); setShowTxModal(true); }}
+                        className="absolute -top-5 right-0 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl z-10 transition-all hover:scale-110 active:scale-95"
+                        style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 6px 20px rgba(26,77,58,0.35)' }}
+                    >
+                        <Plus size={28} strokeWidth={2.5} />
+                    </button>
+
                     <h2 className="text-lg font-bold text-forest-900 mb-4 flex items-center gap-2">
                         <span className="w-1.5 h-5 rounded-full" style={{ backgroundColor: '#7d4e31' }}></span>
                         {t('dashboard.categoriesAndLimits')}
                     </h2>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         {d.categoryBreakdown.map(cat => {
                             if (cat.id === 'other') return null;
 
                             const limit = cat.monthlyLimit || 0;
                             const spent = cat.spentAmount || 0;
                             const isOver = limit > 0 && spent > limit;
-                            const progress = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
 
                             return (
                                 <div
@@ -274,56 +301,24 @@ export default function Dashboard({ tgUser }) {
                                     data-drop-target
                                     data-drop-type="category"
                                     data-drop-id={cat.id}
-                                    className="bg-white rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group border border-transparent hover:border-forest-200"
-                                    style={{ boxShadow: '0 4px 16px rgba(26,77,58,0.06)' }}
+                                    className="bg-white rounded-2xl px-4 py-4 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98] flex items-center gap-3"
+                                    style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}
                                 >
                                     {/* Icon */}
-                                    <div className="flex items-center justify-between mb-3 w-full">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
-                                            {cat.icon}
-                                        </div>
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
+                                        style={{ backgroundColor: `${cat.color}15` }}>
+                                        {cat.icon}
                                     </div>
-
-                                    <h4 className="font-bold text-forest-900 leading-tight mb-2 truncate text-sm sm:text-base">{t(`categories.${cat.name}`, cat.name)}</h4>
-
-                                    {/* Amount Details */}
-                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between font-medium text-[10px] sm:text-xs mb-1 sm:mb-2">
-                                        <span className={`font-bold text-xs sm:text-sm truncate w-full ${isOver ? 'text-red-500' : 'text-forest-700'}`}>
+                                    {/* Name + Amount */}
+                                    <div className="flex flex-col min-w-0">
+                                        <h4 className="font-bold text-forest-900 text-sm truncate">{t(`categories.${cat.name}`, cat.name)}</h4>
+                                        <span className={`text-sm font-bold ${isOver ? 'text-red-500' : 'text-forest-700'}`}>
                                             {formatCurrency(spent)}
                                         </span>
-                                        <span className="text-slate-400 text-[9px] sm:text-xs">/ {limit > 0 ? formatCurrency(limit) : '∞'}</span>
                                     </div>
-
-                                    {/* Progress Bar */}
-                                    {limit > 0 && (
-                                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-700 ${isOver ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-forest-500'}`}
-                                                style={{ width: `${Math.max(progress, 3)}%` }}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* Warning text */}
-                                    {isOver && (
-                                        <p className="text-[10px] text-red-500 mt-2 font-bold animate-pulse">
-                                            {t('dashboard.overLimit')} (-{formatCurrency(spent - limit)})
-                                        </p>
-                                    )}
                                 </div>
                             );
                         })}
-
-                        {/* + Add Category Card */}
-                        <div
-                            onClick={() => openCatModal()}
-                            className="bg-slate-50/50 rounded-2xl p-4 border border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-earth-400 transition-all min-h-[160px] group"
-                        >
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white mb-3 shadow-md transition-transform group-hover:scale-110" style={{ backgroundColor: '#7d4e31' }}>
-                                <Plus size={24} strokeWidth={3} />
-                            </div>
-                            <span className="text-sm font-bold text-slate-500 group-hover:text-earth-600 transition-colors">{t('dashboard.addCategory')}</span>
-                        </div>
                     </div>
                 </div>
 
