@@ -30,17 +30,21 @@ export default function Dashboard({ tgUser }) {
     const [editingCategory, setEditingCategory] = useState(null);
     const [catForm, setCatForm] = useState({ name: '', icon: '💰', color: '#1a4d3a', monthlyLimit: 0 });
 
+    const [accounts, setAccounts] = useState([]);
+
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const [dashRes, debtsRes, goalsRes] = await Promise.allSettled([
+            const [dashRes, debtsRes, goalsRes, accountsRes] = await Promise.allSettled([
                 getDashboardSummary(),
                 getDebts(),
-                getGoals()
+                getGoals(),
+                getAccounts()
             ]);
             if (dashRes.status === 'fulfilled') setData(dashRes.value.data);
             if (debtsRes.status === 'fulfilled') setDebtData(debtsRes.value.data);
             if (goalsRes.status === 'fulfilled') setGoalData(goalsRes.value.data);
+            if (accountsRes.status === 'fulfilled') setAccounts(accountsRes.value.data);
         } catch (err) {
             console.error('Dashboard load error:', err);
         } finally {
@@ -204,9 +208,9 @@ export default function Dashboard({ tgUser }) {
                     </button>
                 </div>
 
-                {/* 3 Summary Cards */}
-                <div className="grid grid-cols-3 gap-3">
-                    {/* 1. Hisobim (Balance) */}
+                {/* Top Row: Accounts (Horizontal Scroll) */}
+                <div className="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 scrollbar-hide snap-x">
+                    {/* 1. Hisobim (General Balance) */}
                     <div
                         draggable
                         onDragStart={(e) => e.dataTransfer.setData('type', 'wallet')}
@@ -223,7 +227,7 @@ export default function Dashboard({ tgUser }) {
                         }}
                         data-drop-target
                         data-drop-type="wallet"
-                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all cursor-grab active:cursor-grabbing touch-none"
+                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing touch-none min-w-[140px] snap-start"
                         style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
                     >
                         <span className="text-xs font-semibold text-slate-500">{t('dashboard.balance')}</span>
@@ -233,37 +237,32 @@ export default function Dashboard({ tgUser }) {
                         </div>
                     </div>
 
-                    {/* 2. Qarzlar (Debts) */}
-                    <a href="/debts"
-                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all block"
-                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-                    >
-                        <span className="text-xs font-semibold text-slate-500">{t('debts.title')}</span>
-                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>
-                            -{formatCurrency(debtData.stats?.totalGivenRemaining || 0)}
-                        </p>
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#fff3e0' }}>
-                            <span className="text-lg">👋</span>
+                    {/* Individual Accounts */}
+                    {accounts.map(acc => (
+                        <div
+                            key={acc.id}
+                            className="bg-white rounded-2xl p-4 flex flex-col gap-2 transition-all min-w-[140px] snap-start"
+                            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                        >
+                            <span className="text-xs font-semibold text-slate-500 truncate">{acc.name}</span>
+                            <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>{formatCurrency(acc.balance)}</p>
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: `${acc.color}15` }}>
+                                <span className="text-lg">{acc.icon || '💳'}</span>
+                            </div>
                         </div>
-                    </a>
+                    ))}
 
-                    {/* 3. Maqsadlar (Goals) */}
-                    <a href="/goals"
-                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all block"
-                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-                    >
-                        <span className="text-xs font-semibold text-slate-500">{t('goals.title')}</span>
-                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>
-                            {totalGoalTarget > 0 ? formatCurrency(totalGoalCollected) : '0 UZS'}
-                        </p>
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#fce4ec' }}>
-                            <Target size={18} style={{ color: '#e91e63' }} />
+                    {/* Add Account Button */}
+                    <a href="/profile" className="bg-slate-50/50 rounded-2xl p-4 border border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all min-w-[120px] snap-start group">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white mb-2 transition-transform group-hover:scale-110" style={{ backgroundColor: '#2d7a55' }}>
+                            <Plus size={18} strokeWidth={3} />
                         </div>
+                        <span className="text-xs font-bold text-slate-500">{t('profile.accounts')}</span>
                     </a>
                 </div>
 
                 {/* 2) CATEGORIES GRID */}
-                <div className="pt-2 relative">
+                <div className="pt-4 relative">
                     {/* FAB Add Transaction Button */}
                     <button
                         draggable
@@ -272,7 +271,7 @@ export default function Dashboard({ tgUser }) {
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                         onClick={() => { setTxInitialData({}); setShowTxModal(true); }}
-                        className="absolute -top-5 right-0 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl z-10 transition-all hover:scale-110 active:scale-95 cursor-grab active:cursor-grabbing touch-none"
+                        className="absolute -top-3 right-0 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl z-10 transition-all hover:scale-110 active:scale-95 cursor-grab active:cursor-grabbing touch-none"
                         style={{ background: 'linear-gradient(135deg, #1a4d3a 0%, #2d7a55 100%)', boxShadow: '0 6px 20px rgba(26,77,58,0.35)' }}
                     >
                         <Plus size={28} strokeWidth={2.5} />
@@ -325,6 +324,37 @@ export default function Dashboard({ tgUser }) {
                             );
                         })}
                     </div>
+                </div>
+
+                {/* Debts & Goals Row */}
+                <div className="grid grid-cols-2 gap-3 pt-6">
+                    {/* Qarzlar (Debts) */}
+                    <a href="/debts"
+                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all block"
+                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                    >
+                        <span className="text-xs font-semibold text-slate-500">{t('debts.title')}</span>
+                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>
+                            -{formatCurrency(debtData.stats?.totalGivenRemaining || 0)}
+                        </p>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#fff3e0' }}>
+                            <span className="text-lg">👋</span>
+                        </div>
+                    </a>
+
+                    {/* Maqsadlar (Goals) */}
+                    <a href="/goals"
+                        className="bg-white rounded-2xl p-4 flex flex-col gap-2 hover:shadow-lg transition-all block"
+                        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                    >
+                        <span className="text-xs font-semibold text-slate-500">{t('goals.title')}</span>
+                        <p className="text-base font-black truncate" style={{ color: '#1a4d3a' }}>
+                            {totalGoalTarget > 0 ? formatCurrency(totalGoalCollected) : '0 UZS'}
+                        </p>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center mt-1" style={{ backgroundColor: '#fce4ec' }}>
+                            <Target size={18} style={{ color: '#e91e63' }} />
+                        </div>
+                    </a>
                 </div>
 
                 {/* 3) ANALYTICS & RECENT TRANSACTIONS */}
@@ -389,116 +419,120 @@ export default function Dashboard({ tgUser }) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Category Modal (Dashboard) */}
-            {isCatModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
-                        <div className="flex justify-between items-center mb-5">
-                            <h3 className="text-xl font-bold text-forest-900">
-                                {editingCategory ? t('dashboard.edit') : t('dashboard.newCategory')}
-                            </h3>
-                            {editingCategory && (
-                                <button type="button" onClick={() => handleCatDelete(editingCategory.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition">
-                                    <Trash2 size={20} />
-                                </button>
-                            )}
-                        </div>
-
-                        <form onSubmit={handleCatSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.categoryName')}</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={catForm.name}
-                                    onChange={e => setCatForm(c => ({ ...c, name: e.target.value }))}
-                                    className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium"
-                                />
+            {
+                isCatModalOpen && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+                            <div className="flex justify-between items-center mb-5">
+                                <h3 className="text-xl font-bold text-forest-900">
+                                    {editingCategory ? t('dashboard.edit') : t('dashboard.newCategory')}
+                                </h3>
+                                {editingCategory && (
+                                    <button type="button" onClick={() => handleCatDelete(editingCategory.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition">
+                                        <Trash2 size={20} />
+                                    </button>
+                                )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.monthlyLimit')}</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={catForm.monthlyLimit}
-                                    onChange={e => setCatForm(c => ({ ...c, monthlyLimit: e.target.value }))}
-                                    className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium font-mono"
-                                    placeholder="0 - limitsiz"
-                                />
-                                <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-tight">{t('dashboard.limitHelpText')}</p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <form onSubmit={handleCatSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.icon')}</label>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.categoryName')}</label>
                                     <input
                                         type="text"
                                         required
-                                        value={catForm.icon}
-                                        onChange={e => setCatForm(c => ({ ...c, icon: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl text-center text-2xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow"
+                                        value={catForm.name}
+                                        onChange={e => setCatForm(c => ({ ...c, name: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.color')}</label>
-                                    <input
-                                        type="color"
-                                        value={catForm.color}
-                                        onChange={e => setCatForm(c => ({ ...c, color: e.target.value }))}
-                                        className="w-full h-[54px] p-1.5 bg-forest-50 border border-forest-100 rounded-xl outline-none cursor-pointer"
-                                    />
-                                </div>
-                            </div>
 
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCatModalOpen(false)}
-                                    className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-95 text-forest-800 bg-forest-50 hover:bg-forest-100"
-                                >
-                                    {t('transactions.cancel')}
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95 hover:opacity-90 shadow-lg"
-                                    style={{ backgroundColor: '#7d4e31' }}
-                                >
-                                    {t('transactions.save')}
-                                </button>
-                            </div>
-                        </form>
+                                <div>
+                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.monthlyLimit')}</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={catForm.monthlyLimit}
+                                        onChange={e => setCatForm(c => ({ ...c, monthlyLimit: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium font-mono"
+                                        placeholder="0 - limitsiz"
+                                    />
+                                    <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-tight">{t('dashboard.limitHelpText')}</p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.icon')}</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={catForm.icon}
+                                            onChange={e => setCatForm(c => ({ ...c, icon: e.target.value }))}
+                                            className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl text-center text-2xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.color')}</label>
+                                        <input
+                                            type="color"
+                                            value={catForm.color}
+                                            onChange={e => setCatForm(c => ({ ...c, color: e.target.value }))}
+                                            className="w-full h-[54px] p-1.5 bg-forest-50 border border-forest-100 rounded-xl outline-none cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCatModalOpen(false)}
+                                        className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-95 text-forest-800 bg-forest-50 hover:bg-forest-100"
+                                    >
+                                        {t('transactions.cancel')}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95 hover:opacity-90 shadow-lg"
+                                        style={{ backgroundColor: '#7d4e31' }}
+                                    >
+                                        {t('transactions.save')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Touch Drag Ghost Element */}
-            {touchDrag.active && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        left: touchDrag.x,
-                        top: touchDrag.y,
-                        transform: 'translate(-50%, -50%) scale(1.1)',
-                        zIndex: 9999,
-                        pointerEvents: 'none',
-                        background: 'rgba(255,255,255,0.95)',
-                        border: '2px solid #1a4d3a',
-                        borderRadius: '16px',
-                        padding: '10px 15px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                        whiteSpace: 'nowrap'
-                    }}
-                >
-                    <div style={{ color: '#1a4d3a' }}>{touchDrag.icon}</div>
-                    <span style={{ color: '#1a4d3a', fontWeight: 'bold', fontSize: '13px' }}>{touchDrag.label}</span>
-                </div>
-            )}
+            {
+                touchDrag.active && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            left: touchDrag.x,
+                            top: touchDrag.y,
+                            transform: 'translate(-50%, -50%) scale(1.1)',
+                            zIndex: 9999,
+                            pointerEvents: 'none',
+                            background: 'rgba(255,255,255,0.95)',
+                            border: '2px solid #1a4d3a',
+                            borderRadius: '16px',
+                            padding: '10px 15px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                            whiteSpace: 'nowrap'
+                        }}
+                    >
+                        <div style={{ color: '#1a4d3a' }}>{touchDrag.icon}</div>
+                        <span style={{ color: '#1a4d3a', fontWeight: 'bold', fontSize: '13px' }}>{touchDrag.label}</span>
+                    </div>
+                )
+            }
         </>
     );
 }
