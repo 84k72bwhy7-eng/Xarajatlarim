@@ -100,7 +100,12 @@ export default function AppLayout({ tgUser, user }) {
             </div>
 
             {/* Main Content */}
-            <main className="max-w-4xl mx-auto py-6 px-4 relative">
+            <main className="max-w-4xl mx-auto py-6 px-4 relative"
+                style={{
+                    paddingTop: isTwa
+                        ? `calc(${(typeof window !== 'undefined' && (window.Telegram?.WebApp?.contentSafeAreaInset?.top || 0)) + (typeof window !== 'undefined' && (window.Telegram?.WebApp?.safeAreaInset?.top || 0))}px + 1.5rem)`
+                        : undefined
+                }}>
                 <Outlet />
             </main>
 
