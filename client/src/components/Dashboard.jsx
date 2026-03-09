@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Plus, Wallet, HandCoins, Target, Trash2, Leaf,
+    Plus, Wallet, HandCoins, Target, Leaf,
     Activity, ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, ChevronDown, Globe
 } from 'lucide-react';
 import CashflowChart from './CashflowChart';
 import CategoryPieChart from './CategoryPieChart';
 import SafeToSpend from './SafeToSpend';
 import AddTransactionModal from './AddTransactionModal';
-import { getDashboardSummary, getDebts, getGoals, getAccounts, createCategory, updateCategory, deleteCategory } from '../lib/api';
+import { getDashboardSummary, getDebts, getGoals, getAccounts } from '../lib/api';
 import { formatCurrency } from '../lib/format';
 
 export default function Dashboard({ tgUser }) {
@@ -34,10 +34,7 @@ export default function Dashboard({ tgUser }) {
     const [debtData, setDebtData] = useState({ debts: [], stats: {} });
     const [goalData, setGoalData] = useState({ goals: [], stats: {} });
 
-    // Category Modal States
-    const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-    const [editingCategory, setEditingCategory] = useState(null);
-    const [catForm, setCatForm] = useState({ name: '', icon: '💰', color: '#1a4d3a', monthlyLimit: 0 });
+
 
     const [accounts, setAccounts] = useState([]);
 
@@ -111,44 +108,7 @@ export default function Dashboard({ tgUser }) {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    // Category CRUD
-    const handleCatSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const payload = { ...catForm, type: 'EXPENSE' };
-            if (editingCategory) {
-                await updateCategory(editingCategory.id, payload);
-            } else {
-                await createCategory(payload);
-            }
-            setIsCatModalOpen(false);
-            fetchData();
-        } catch (err) {
-            alert('Xatolik yuz berdi');
-        }
-    };
 
-    const handleCatDelete = async (id) => {
-        if (!confirm("O'chirmoqchimisiz?")) return;
-        try {
-            await deleteCategory(id);
-            setIsCatModalOpen(false);
-            fetchData();
-        } catch (err) {
-            alert('O\'chirishda xato yuz berdi');
-        }
-    };
-
-    const openCatModal = (cat = null) => {
-        if (cat) {
-            setEditingCategory(cat);
-            setCatForm({ name: cat.name, icon: cat.icon, color: cat.color, monthlyLimit: cat.monthlyLimit || 0 });
-        } else {
-            setEditingCategory(null);
-            setCatForm({ name: '', icon: '💰', color: '#7d4e31', monthlyLimit: 0 });
-        }
-        setIsCatModalOpen(true);
-    };
 
     if (loading) {
         return (
@@ -316,7 +276,7 @@ export default function Dashboard({ tgUser }) {
                             return (
                                 <div
                                     key={cat.id}
-                                    onClick={() => openCatModal(cat)}
+                                    onClick={() => { setTxInitialData({ type: 'EXPENSE', categoryId: cat.id }); setShowTxModal(true); }}
                                     onDragOver={(e) => e.preventDefault()}
                                     onDrop={(e) => {
                                         if (e.dataTransfer.getData('type') === 'wallet') {
@@ -446,90 +406,7 @@ export default function Dashboard({ tgUser }) {
                 </div>
             </div >
 
-            {/* Category Modal (Dashboard) */}
-            {
-                isCatModalOpen && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
-                            <div className="flex justify-between items-center mb-5">
-                                <h3 className="text-xl font-bold text-forest-900">
-                                    {editingCategory ? t('dashboard.edit') : t('dashboard.newCategory')}
-                                </h3>
-                                {editingCategory && (
-                                    <button type="button" onClick={() => handleCatDelete(editingCategory.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition">
-                                        <Trash2 size={20} />
-                                    </button>
-                                )}
-                            </div>
 
-                            <form onSubmit={handleCatSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.categoryName')}</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={catForm.name}
-                                        onChange={e => setCatForm(c => ({ ...c, name: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.monthlyLimit')}</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={catForm.monthlyLimit}
-                                        onChange={e => setCatForm(c => ({ ...c, monthlyLimit: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow text-forest-900 font-medium font-mono"
-                                        placeholder="0 - limitsiz"
-                                    />
-                                    <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-tight">{t('dashboard.limitHelpText')}</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.icon')}</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={catForm.icon}
-                                            onChange={e => setCatForm(c => ({ ...c, icon: e.target.value }))}
-                                            className="w-full px-4 py-3 bg-forest-50 border border-forest-100 rounded-xl text-center text-2xl outline-none focus:ring-2 focus:ring-forest-500 transition-shadow"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-forest-800 mb-1.5">{t('dashboard.color')}</label>
-                                        <input
-                                            type="color"
-                                            value={catForm.color}
-                                            onChange={e => setCatForm(c => ({ ...c, color: e.target.value }))}
-                                            className="w-full h-[54px] p-1.5 bg-forest-50 border border-forest-100 rounded-xl outline-none cursor-pointer"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-3 pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCatModalOpen(false)}
-                                        className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-95 text-forest-800 bg-forest-50 hover:bg-forest-100"
-                                    >
-                                        {t('transactions.cancel')}
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="flex-1 py-3 px-6 text-white rounded-xl font-bold transition-all active:scale-95 hover:opacity-90 shadow-lg"
-                                        style={{ backgroundColor: '#7d4e31' }}
-                                    >
-                                        {t('transactions.save')}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )
-            }
 
             {/* Touch Drag Ghost Element */}
             {
