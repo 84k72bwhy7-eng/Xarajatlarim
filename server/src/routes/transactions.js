@@ -104,7 +104,7 @@ router.get('/', async (req, res) => {
         const [transactions, total] = await Promise.all([
             prisma.transaction.findMany({
                 where,
-                include: { category: true, account: true },
+                include: { category: true, account: true, transferToAccount: true },
                 orderBy: { date: 'desc' },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),

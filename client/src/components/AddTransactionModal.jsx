@@ -18,6 +18,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
         currency: baseCurrency,
         category: '',
         account: '',
+        transferToAccount: '',
         date: new Date().toISOString().split('T')[0],
         description: '',
     });
@@ -34,6 +35,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                 ...prev,
                 type: initialData.type || 'EXPENSE',
                 category: initialData.categoryId || '',
+                transferToAccount: initialData.transferToAccountId || '',
                 amount: '',
                 currency: baseCurrency,
                 description: '',
@@ -55,6 +57,10 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                 } else if (accs.length > 0) {
                     setForm(prev => ({ ...prev, account: accs[0].id }));
                 }
+                // Set transferToAccount from initialData
+                if (initialData.transferToAccountId && accs.some(a => a.id === initialData.transferToAccountId)) {
+                    setForm(prev => ({ ...prev, transferToAccount: initialData.transferToAccountId }));
+                }
             }).catch(() => { });
         }
     }, [isOpen, initialData]);
@@ -73,14 +79,25 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
             alert('Hisob tanlanmagan!');
             return;
         }
+        if (form.type === 'TRANSFER') {
+            if (!form.transferToAccount) {
+                alert(t('transactions.targetAccount') + ' tanlanmagan!');
+                return;
+            }
+            if (form.account === form.transferToAccount) {
+                alert(t('transactions.sameAccountError'));
+                return;
+            }
+        }
         setLoading(true);
         try {
             await createTransaction({
                 type: form.type,
                 amount: parseFloat(form.amount),
                 originalCurrency: form.currency,
-                categoryId: form.category || undefined,
+                categoryId: form.type !== 'TRANSFER' ? (form.category || undefined) : undefined,
                 accountId: form.account,
+                transferToAccountId: form.type === 'TRANSFER' ? form.transferToAccount : undefined,
                 date: new Date(form.date).toISOString(),
                 description: form.description || undefined,
             });
@@ -92,6 +109,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                 currency: baseCurrency,
                 category: '',
                 account: '',
+                transferToAccount: '',
                 date: new Date().toISOString().split('T')[0],
                 description: '',
             });
@@ -227,14 +245,33 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                         </div>
                     )}
 
-                    {/* Account */}
+                    {/* Account (From) */}
                     {accounts.length > 0 && (
                         <div>
-                            <label style={labelStyle}>{t('transactions.account')}</label>
+                            <label style={labelStyle}>{form.type === 'TRANSFER' ? t('transactions.fromAccount') : t('transactions.account')}</label>
                             <select name="account" value={form.account} onChange={handleChange} style={inputStyle}>
                                 {accounts.map(acc => (
-                                    <option key={acc.id} value={acc.id}>{acc.name} — ${Number(acc.balance).toLocaleString()}</option>
+                                    <option key={acc.id} value={acc.id}>{acc.name} — {Number(acc.balance).toLocaleString()}</option>
                                 ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {/* Transfer To Account */}
+                    {form.type === 'TRANSFER' && accounts.length > 0 && (
+                        <div>
+                            <label style={labelStyle}>{t('transactions.targetAccount')}</label>
+                            <select name="transferToAccount" value={form.transferToAccount} onChange={handleChange}
+                                style={{
+                                    ...inputStyle,
+                                    borderColor: form.transferToAccount && form.account === form.transferToAccount ? '#ef4444' : '#dff2ea'
+                                }}>
+                                <option value="">{t('transactions.targetAccount')}...</option>
+                                {accounts
+                                    .filter(acc => acc.id !== form.account)
+                                    .map(acc => (
+                                        <option key={acc.id} value={acc.id}>{acc.name} — {Number(acc.balance).toLocaleString()}</option>
+                                    ))}
                             </select>
                         </div>
                     )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Loader2, Leaf, Trash2 } from 'lucide-react';
+import { Plus, Search, Loader2, Leaf, Trash2, ArrowRightLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getTransactions, deleteTransaction } from '../lib/api';
 import AddTransactionModal from '../components/AddTransactionModal';
@@ -52,6 +52,7 @@ export default function TransactionsPage() {
         { val: 'ALL', label: 'Barchasi' },
         { val: 'EXPENSE', label: t('transactions.expense') },
         { val: 'INCOME', label: t('transactions.income') },
+        { val: 'TRANSFER', label: t('transactions.transfer') },
     ];
 
     return (
@@ -124,14 +125,21 @@ export default function TransactionsPage() {
                                 <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-[#f7fcf9] transition">
                                     <div className="flex items-center gap-3">
                                         <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
-                                            style={{ backgroundColor: `${tx.category?.color || '#2d7a55'}15` }}>
-                                            {tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸')}
+                                            style={{ backgroundColor: tx.type === 'TRANSFER' ? '#e0f2fe' : `${tx.category?.color || '#2d7a55'}15` }}>
+                                            {tx.type === 'TRANSFER' ? <ArrowRightLeft size={20} style={{ color: '#0284c7' }} /> : (tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸'))}
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>
-                                                {tx.description || tx.category?.name || '-'}
+                                                {tx.type === 'TRANSFER'
+                                                    ? (tx.description || t('transactions.transfer'))
+                                                    : (tx.description || tx.category?.name || '-')}
                                             </p>
-                                            {tx.category && (
+                                            {tx.type === 'TRANSFER' ? (
+                                                <p className="text-xs flex items-center gap-1.5 mt-0.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#0284c7' }}></span>
+                                                    <span style={{ color: '#0284c7' }}>{tx.account?.name} → {tx.transferToAccount?.name || t('transactions.targetAccount')}</span>
+                                                </p>
+                                            ) : tx.category && (
                                                 <p className="text-xs flex items-center gap-1.5 mt-0.5">
                                                     <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: tx.category.color }}></span>
                                                     <span style={{ color: '#a06040' }}>{getCategoryName(tx.category.name, i18n.language)}</span>
@@ -140,8 +148,8 @@ export default function TransactionsPage() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-bold" style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
-                                            {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                        <p className="text-sm font-bold" style={{ color: tx.type === 'INCOME' ? '#1e6142' : tx.type === 'TRANSFER' ? '#0284c7' : '#7d4e31' }}>
+                                            {tx.type === 'INCOME' ? '+' : tx.type === 'TRANSFER' ? '' : '-'}{formatCurrency(tx.amount)}
                                         </p>
                                         <div className="flex items-center justify-end gap-2 mt-0.5">
                                             <p className="text-xs" style={{ color: '#a06040' }}>

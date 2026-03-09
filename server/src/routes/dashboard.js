@@ -111,7 +111,7 @@ router.get('/summary', async (req, res) => {
         // 5. So'nggi tranzaksiyalar
         const recentTransactions = await prisma.transaction.findMany({
             where: { userId: req.userId },
-            include: { category: true, account: true },
+            include: { category: true, account: true, transferToAccount: true },
             orderBy: { date: 'desc' },
             take: 10,
         });

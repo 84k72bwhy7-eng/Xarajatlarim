@@ -51,7 +51,9 @@
         "income": "Daromad",
         "expense": "Xarajat",
         "transfer": "O'tkazma",
-        "deleteConfirm": "O'chirishni tasdiqlaysizmi?"
+        "deleteConfirm": "O'chirishni tasdiqlaysizmi?",
+        "fromAccount": "Qaysi hisobdan",
+        "sameAccountError": "Bir xil hisobni tanlash mumkin emas"
     },
     "budget": {
         "title": "Byudjetlar",

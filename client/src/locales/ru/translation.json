@@ -51,7 +51,9 @@
         "income": "Доход",
         "expense": "Расход",
         "transfer": "Перевод",
-        "deleteConfirm": "Подтверждаете удаление?"
+        "deleteConfirm": "Подтверждаете удаление?",
+        "fromAccount": "Из какого счёта",
+        "sameAccountError": "Нельзя выбрать тот же счёт"
     },
     "budget": {
         "title": "Бюджеты",

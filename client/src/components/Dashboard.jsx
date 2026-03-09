@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Plus, Wallet, HandCoins, Target, Leaf,
-    Activity, ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, ChevronDown, Globe
+    Activity, ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, ChevronDown, Globe, ArrowRightLeft
 } from 'lucide-react';
 import CashflowChart from './CashflowChart';
 import CategoryPieChart from './CategoryPieChart';
@@ -28,7 +28,7 @@ export default function Dashboard({ tgUser }) {
     };
 
     // Touch Drag State
-    const [touchDrag, setTouchDrag] = useState({ active: false, type: null, x: 0, y: 0, label: '', icon: null });
+    const [touchDrag, setTouchDrag] = useState({ active: false, type: null, x: 0, y: 0, label: '', icon: null, accountId: null });
 
     // Summary Data States
     const [debtData, setDebtData] = useState({ debts: [], stats: {} });
@@ -59,7 +59,7 @@ export default function Dashboard({ tgUser }) {
     }, []);
 
     // Touch Handlers
-    const handleTouchStart = (e, type, label, icon) => {
+    const handleTouchStart = (e, type, label, icon, accountId = null) => {
         const touch = e.touches[0];
         setTouchDrag({
             active: true,
@@ -67,7 +67,8 @@ export default function Dashboard({ tgUser }) {
             x: touch.clientX,
             y: touch.clientY,
             label,
-            icon
+            icon,
+            accountId
         });
     };
 
@@ -85,7 +86,8 @@ export default function Dashboard({ tgUser }) {
 
         const x = touchDrag.x;
         const y = touchDrag.y;
-        setTouchDrag({ active: false, type: null, x: 0, y: 0, label: '', icon: null });
+        const dragAccountId = touchDrag.accountId;
+        setTouchDrag({ active: false, type: null, x: 0, y: 0, label: '', icon: null, accountId: null });
 
         // Find drop target
         const element = document.elementFromPoint(x, y);
@@ -98,10 +100,14 @@ export default function Dashboard({ tgUser }) {
         const targetId = dropTarget.getAttribute('data-drop-id');
 
         if (touchDrag.type === 'add' && targetType === 'wallet') {
-            setTxInitialData({ type: 'INCOME' });
+            setTxInitialData({ type: 'INCOME', accountId: targetId });
             setShowTxModal(true);
         } else if (touchDrag.type === 'wallet' && targetType === 'category') {
-            setTxInitialData({ type: 'EXPENSE', categoryId: targetId });
+            setTxInitialData({ type: 'EXPENSE', categoryId: targetId, accountId: dragAccountId });
+            setShowTxModal(true);
+        } else if (touchDrag.type === 'wallet' && targetType === 'wallet' && dragAccountId && targetId && dragAccountId !== targetId) {
+            // Account → Account transfer (touch)
+            setTxInitialData({ type: 'TRANSFER', accountId: dragAccountId, transferToAccountId: targetId });
             setShowTxModal(true);
         }
     };
@@ -198,19 +204,28 @@ export default function Dashboard({ tgUser }) {
                                     e.dataTransfer.setData('type', 'wallet');
                                     e.dataTransfer.setData('accountId', acc.id);
                                 }}
-                                onTouchStart={(e) => handleTouchStart(e, 'wallet', acc.name, <Wallet size={20} />)}
+                                onTouchStart={(e) => handleTouchStart(e, 'wallet', acc.name, <Wallet size={20} />, acc.id)}
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={handleTouchEnd}
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={(e) => {
-                                    if (e.dataTransfer.getData('type') === 'add') {
+                                    const dragType = e.dataTransfer.getData('type');
+                                    if (dragType === 'add') {
                                         e.preventDefault();
                                         setTxInitialData({ type: 'INCOME', accountId: acc.id });
                                         setShowTxModal(true);
+                                    } else if (dragType === 'wallet') {
+                                        e.preventDefault();
+                                        const sourceAccountId = e.dataTransfer.getData('accountId');
+                                        if (sourceAccountId && sourceAccountId !== acc.id) {
+                                            setTxInitialData({ type: 'TRANSFER', accountId: sourceAccountId, transferToAccountId: acc.id });
+                                            setShowTxModal(true);
+                                        }
                                     }
                                 }}
                                 data-drop-target
                                 data-drop-type="wallet"
+                                data-drop-id={acc.id}
                                 className="bg-white rounded-2xl p-3 flex flex-col gap-1 transition-all cursor-grab active:cursor-grabbing touch-none min-w-[105px] max-w-[130px] flex-1 snap-start relative overflow-hidden"
                                 style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
                             >
@@ -374,17 +389,25 @@ export default function Dashboard({ tgUser }) {
                                             <div key={tx.id} className="py-3 flex items-center justify-between hover:bg-[#f0faf5] rounded-xl px-2 -mx-2 transition">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg"
-                                                        style={{ backgroundColor: `${tx.category?.color || '#2d7a55'}18` }}>
-                                                        {tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸')}
+                                                        style={{ backgroundColor: tx.type === 'TRANSFER' ? '#e0f2fe' : `${tx.category?.color || '#2d7a55'}18` }}>
+                                                        {tx.type === 'TRANSFER' ? <ArrowRightLeft size={18} style={{ color: '#0284c7' }} /> : (tx.category?.icon || (tx.type === 'INCOME' ? '💵' : '💸'))}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>{tx.description || t(`categories.${tx.category?.name}`, tx.category?.name) || '-'}</p>
-                                                        <p className="text-xs" style={{ color: '#7d4e31' }}>{t(`categories.${tx.category?.name}`, tx.category?.name)}</p>
+                                                        <p className="text-sm font-semibold" style={{ color: '#1a4d3a' }}>
+                                                            {tx.type === 'TRANSFER'
+                                                                ? (tx.description || t('transactions.transfer'))
+                                                                : (tx.description || t(`categories.${tx.category?.name}`, tx.category?.name) || '-')}
+                                                        </p>
+                                                        <p className="text-xs" style={{ color: tx.type === 'TRANSFER' ? '#0284c7' : '#7d4e31' }}>
+                                                            {tx.type === 'TRANSFER'
+                                                                ? `${tx.account?.name} → ${tx.transferToAccount?.name || ''}`
+                                                                : t(`categories.${tx.category?.name}`, tx.category?.name)}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className={`text-sm font-bold`} style={{ color: tx.type === 'INCOME' ? '#1e6142' : '#7d4e31' }}>
-                                                        {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                                    <p className={`text-sm font-bold`} style={{ color: tx.type === 'INCOME' ? '#1e6142' : tx.type === 'TRANSFER' ? '#0284c7' : '#7d4e31' }}>
+                                                        {tx.type === 'INCOME' ? '+' : tx.type === 'TRANSFER' ? '' : '-'}{formatCurrency(tx.amount)}
                                                     </p>
                                                     <p className="text-xs" style={{ color: '#a06040' }}>{new Date(tx.date).toLocaleDateString()}</p>
                                                 </div>
