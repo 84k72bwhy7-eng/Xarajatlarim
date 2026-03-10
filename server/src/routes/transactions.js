@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
             prisma.transaction.findMany({
                 where,
                 include: { category: true, account: true, transferToAccount: true },
-                orderBy: { date: 'desc' },
+                orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
             }),

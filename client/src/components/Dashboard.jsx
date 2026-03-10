@@ -409,7 +409,7 @@ export default function Dashboard({ tgUser }) {
                                                     <p className={`text-sm font-bold`} style={{ color: tx.type === 'INCOME' ? '#1e6142' : tx.type === 'TRANSFER' ? '#0284c7' : '#7d4e31' }}>
                                                         {tx.type === 'INCOME' ? '+' : tx.type === 'TRANSFER' ? '' : '-'}{formatCurrency(tx.amount)}
                                                     </p>
-                                                    <p className="text-xs" style={{ color: '#a06040' }}>{new Date(tx.date).toLocaleDateString()}</p>
+                                                    <p className="text-xs" style={{ color: '#a06040' }}>{new Date(tx.date).toLocaleDateString()} {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                                 </div>
                                             </div>
                                         ))}

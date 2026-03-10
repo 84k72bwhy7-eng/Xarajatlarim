@@ -12,6 +12,13 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
     const [exchangeRate, setExchangeRate] = useState(null);
     const user = JSON.parse(localStorage.getItem('user')) || {};
     const baseCurrency = user.currency || 'UZS';
+    const getLocalDateTime = () => {
+        const now = new Date();
+        const offset = now.getTimezoneOffset();
+        const local = new Date(now.getTime() - offset * 60000);
+        return local.toISOString().slice(0, 16);
+    };
+
     const [form, setForm] = useState({
         type: 'EXPENSE',
         amount: '',
@@ -19,7 +26,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
         category: '',
         account: '',
         transferToAccount: '',
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateTime(),
         description: '',
     });
 
@@ -39,7 +46,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                 amount: '',
                 currency: baseCurrency,
                 description: '',
-                date: new Date().toISOString().split('T')[0],
+                date: getLocalDateTime(),
             }));
 
             getCategories().then(r => {
@@ -110,7 +117,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                 category: '',
                 account: '',
                 transferToAccount: '',
-                date: new Date().toISOString().split('T')[0],
+                date: getLocalDateTime(),
                 description: '',
             });
         } catch (err) {
@@ -279,7 +286,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, initia
                     {/* Date */}
                     <div>
                         <label style={labelStyle}>{t('transactions.date')}</label>
-                        <input type="date" name="date" value={form.date} onChange={handleChange} style={inputStyle} />
+                        <input type="datetime-local" name="date" value={form.date} onChange={handleChange} style={inputStyle} />
                     </div>
 
                     {/* Description */}

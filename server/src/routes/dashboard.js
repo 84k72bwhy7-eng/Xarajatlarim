@@ -112,7 +112,7 @@ router.get('/summary', async (req, res) => {
         const recentTransactions = await prisma.transaction.findMany({
             where: { userId: req.userId },
             include: { category: true, account: true, transferToAccount: true },
-            orderBy: { date: 'desc' },
+            orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
             take: 10,
         });
 

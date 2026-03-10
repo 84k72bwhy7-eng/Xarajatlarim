@@ -153,7 +153,7 @@ export default function TransactionsPage() {
                                         </p>
                                         <div className="flex items-center justify-end gap-2 mt-0.5">
                                             <p className="text-xs" style={{ color: '#a06040' }}>
-                                                {new Date(tx.date).toLocaleDateString()}
+                                                {new Date(tx.date).toLocaleDateString()} {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleDelete(tx.id); }}
