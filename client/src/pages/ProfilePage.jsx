@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     User, Mail, Camera, Save, Key, Plus, Trash2,
-    Edit2, Wallet, Tag, ChevronRight, Loader2, Leaf
+    Edit2, Wallet, Tag, ChevronRight, Loader2, Leaf, Smartphone
 } from 'lucide-react';
 import {
     getProfile, updateProfile, updatePassword, changeCurrency,
@@ -391,6 +391,25 @@ export default function ProfilePage() {
                                 Dollar (USD)
                             </button>
                         </div>
+                    </div>
+
+                    <hr className="my-6 border-forest-100" />
+
+                    <div className="space-y-3">
+                        <label className="text-sm font-bold text-forest-800">Qo'shimcha</label>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (window.Telegram?.WebApp?.addToHomeScreen) {
+                                    window.Telegram.WebApp.addToHomeScreen();
+                                } else {
+                                    alert("Kechirasiz, qurilmangiz yoki Telegram versiyangiz buni qo'llab-quvvatlamaydi.");
+                                }
+                            }}
+                            className="bg-forest-50 hover:bg-forest-100 text-forest-800 font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 w-full transition border border-forest-200"
+                        >
+                            <Smartphone size={18} /> Ekranga (Domoy) qo'shish
+                        </button>
                     </div>
                 </div>
             )}
