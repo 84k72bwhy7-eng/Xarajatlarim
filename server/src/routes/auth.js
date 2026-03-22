@@ -1,12 +1,10 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 import auth from '../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-
 // Default kategoriyalar
 const DEFAULT_CATEGORIES = [
     { name: 'Oziq-ovqat', icon: '🍔', type: 'EXPENSE', color: '#ef4444' },

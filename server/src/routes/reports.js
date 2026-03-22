@@ -1,11 +1,9 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 import auth from '../middleware/auth.js';
 import ExcelJS from 'exceljs';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-
 router.use(auth);
 
 // GET /api/reports/excel

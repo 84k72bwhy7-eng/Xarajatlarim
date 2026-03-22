@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-
+import prisma from '../prisma.js';
 /**
  * Safe-to-Spend algoritmi:
  * 

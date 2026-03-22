@@ -14,11 +14,9 @@ import profileRoutes from './routes/profile.js';
 import adminRoutes from './routes/admin.js';
 import debtRoutes from './routes/debts.js';
 import goalRoutes from './routes/goals.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from './prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-const prisma = new PrismaClient();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -98,7 +96,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+prisma.$connect()
+  .then(() => {
+    console.log('📦 Connected to Database via Prisma');
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Database connection error:', error);
+    process.exit(1);
+  });
 export default app;

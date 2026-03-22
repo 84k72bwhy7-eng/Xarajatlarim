@@ -1,10 +1,9 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 import auth from '../middleware/auth.js';
 import { calculateSafeToSpend } from '../services/calculator.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 router.use(auth);
 
 // GET /api/dashboard/summary — Asosiy dashboard ma'lumotlari

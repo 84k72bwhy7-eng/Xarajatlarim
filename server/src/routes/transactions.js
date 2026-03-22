@@ -1,12 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 import auth from '../middleware/auth.js';
 import { autoCategorize } from '../services/categorizer.js';
 import { convertToUZS, convertFromUZS } from '../services/currency.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-
 // All routes require auth
 router.use(auth);
 

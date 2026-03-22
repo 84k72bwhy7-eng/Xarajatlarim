@@ -1,12 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 import auth from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-
 // SuperAdmin middleware
 const superAdmin = async (req, res, next) => {
     try {

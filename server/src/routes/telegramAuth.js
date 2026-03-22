@@ -1,10 +1,9 @@
 import express from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // Telegram Web App orqali login

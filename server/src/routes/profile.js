@@ -1,12 +1,10 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma.js';
 import auth from '../middleware/auth.js';
 import { convertToUZS, convertFromUZS } from '../services/currency.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-
 router.use(auth);
 
 // GET /api/profile — Profil ma'lumotlarini olish
