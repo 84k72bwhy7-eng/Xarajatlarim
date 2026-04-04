@@ -1,6 +1,10 @@
 import asyncio
 import logging
-import jwt as pyjwt
+import hmac
+import hashlib
+import base64
+import json
+import time
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, BotCommand, WebAppInfo, MenuButtonWebApp, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart, CommandObject
@@ -17,6 +21,24 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 JWT_SECRET = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-this")
 VERSION = "v1.0.7"
 APP_URL_SCHEME = "tanga"  # iOS ilovaning URL scheme'i
+
+
+def jwt_encode(payload, secret):
+    """PyJWT kerak bo'lmasdan JWT token yaratish (built-in modullar bilan)"""
+    header = {"alg": "HS256", "typ": "JWT"}
+    # exp qo'shish (30 kun)
+    payload_with_exp = {**payload, "exp": int(time.time()) + 30 * 24 * 3600}
+    
+    def b64url(data):
+        return base64.urlsafe_b64encode(json.dumps(data, separators=(',', ':')).encode()).rstrip(b'=').decode()
+    
+    header_b64 = b64url(header)
+    payload_b64 = b64url(payload_with_exp)
+    signature_input = f"{header_b64}.{payload_b64}"
+    signature = hmac.new(secret.encode(), signature_input.encode(), hashlib.sha256).digest()
+    signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b'=').decode()
+    
+    return f"{header_b64}.{payload_b64}.{signature_b64}"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -61,7 +83,7 @@ async def handle_ios_auth(message: Message, start_param: str):
             "username": tg_user.username or "",
             "auth_session": start_param,
         }
-        token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+        token = jwt_encode(token_payload, JWT_SECRET)
         
         # Ilovaga qaytish tugmasi
         deep_link_url = f"{APP_URL_SCHEME}://login?token={token}"
