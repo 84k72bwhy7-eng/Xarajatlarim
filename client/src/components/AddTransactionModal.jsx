@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { createTransaction, getCategories, getAccounts, getExchangeRate } from '../lib/api';
 import { getCategoryName } from '../lib/categoryTranslations';
 
-export default function AddTransactionModal({ isOpen, onClose, onSuccess, initialData = {} }) {
+const defaultInitialData = {};
+
+export default function AddTransactionModal({ isOpen, onClose, onSuccess, initialData = defaultInitialData }) {
     const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
