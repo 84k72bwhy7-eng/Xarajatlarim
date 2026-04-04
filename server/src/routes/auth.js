@@ -106,6 +106,59 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// POST /api/auth/google
+router.post('/google', async (req, res) => {
+    try {
+        const { idToken } = req.body;
+        if (!idToken) {
+            return res.status(400).json({ error: 'idToken required' });
+        }
+
+        // Verify token with Google's tokeninfo endpoint
+        const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+        if (!response.ok) {
+            return res.status(401).json({ error: 'Invalid Google token' });
+        }
+        const payload = await response.json();
+
+        // Check client ID
+        const clientId = "359224853780-e9k4l1r99v0cvn3otg6ieacq0v1bcjp5.apps.googleusercontent.com";
+        if (payload.aud !== clientId) {
+            return res.status(401).json({ error: 'Invalid Client ID' });
+        }
+
+        const email = payload.email;
+        const name = payload.name;
+        // const picture = payload.picture;
+
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    password: 'google-oauth',
+                    name,
+                    categories: { create: DEFAULT_CATEGORIES },
+                    accounts: {
+                        create: { name: 'Naqd pul', type: 'CASH', balance: 0, color: '#22c55e', icon: 'wallet' },
+                    },
+                },
+                select: { id: true, email: true, name: true, currency: true },
+            });
+        }
+
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+        res.json({
+            user: { id: user.id, email: user.email, name: user.name, currency: user.currency },
+            token,
+        });
+    } catch (error) {
+        console.error('Google auth error:', error);
+        res.status(500).json({ error: 'Server xatosi' });
+    }
+});
+
 // GET /api/auth/me
 router.get('/me', auth, async (req, res) => {
     try {
