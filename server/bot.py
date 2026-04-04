@@ -1,8 +1,9 @@
 import asyncio
 import logging
+import jwt as pyjwt
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, BotCommand, WebAppInfo, MenuButtonWebApp
-from aiogram.filters import CommandStart
+from aiogram.types import Message, BotCommand, WebAppInfo, MenuButtonWebApp, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.filters import CommandStart, CommandObject
 from aiogram.fsm.storage.memory import MemoryStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from handlers.expense import router as expense_router, get_main_keyboard
@@ -13,7 +14,9 @@ from dotenv import load_dotenv
 load_dotenv() # .env
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+JWT_SECRET = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-this")
 VERSION = "v1.0.7"
+APP_URL_SCHEME = "tanga"  # iOS ilovaning URL scheme'i
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,6 +32,62 @@ dp.include_router(expense_router)
 # Settings router olib tashlandi (foydalanuvchi xohishi bilan)
 
 # Eski get_webapp_keyboard olib tashlandi, handlers/expense.py dagi get_main_keyboard ishlatiladi
+
+@dp.message(CommandStart(deep_link=True))
+async def start_with_deep_link(message: Message, command: CommandObject):
+    """Deep link bilan /start buyrug'i (iOS ilovadan)"""
+    deep_link_param = command.args
+    
+    # iOS ilovadan kelgan auth so'rovi
+    if deep_link_param and deep_link_param.startswith("auth_"):
+        await handle_ios_auth(message, deep_link_param)
+        return
+    
+    # Boshqa deep link yoki oddiy /start
+    await start_handler(message)
+
+
+async def handle_ios_auth(message: Message, start_param: str):
+    """iOS ilova uchun Telegram avtorizatsiya"""
+    tg_user = message.from_user
+    pool = message.bot.pool
+    
+    try:
+        # JWT token yaratish (Node.js backend bilan bir xil JWT_SECRET ishlatiladi)
+        token_payload = {
+            "telegram_id": str(tg_user.id),
+            "first_name": tg_user.first_name or "",
+            "last_name": tg_user.last_name or "",
+            "username": tg_user.username or "",
+            "auth_session": start_param,
+        }
+        token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+        
+        # Ilovaga qaytish tugmasi
+        deep_link_url = f"{APP_URL_SCHEME}://login?token={token}"
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📱 Tanga ilovasiga qaytish", url=deep_link_url)]
+        ])
+        
+        user_name = tg_user.first_name or "Foydalanuvchi"
+        await message.answer(
+            f"✅ Xush kelibsiz, <b>{user_name}</b>!\n\n"
+            f"Avtorizatsiya muvaffaqiyatli.\n"
+            f"Ilovaga qaytish uchun quyidagi tugmani bosing:",
+            parse_mode="HTML",
+            reply_markup=keyboard
+        )
+        
+        logger.info(f"[iOS Auth] User {tg_user.id} ({user_name}) authenticated via deep link")
+        
+    except Exception as e:
+        logger.error(f"[iOS Auth] Error: {e}")
+        await message.answer(
+            "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+            parse_mode="HTML"
+        )
+
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
@@ -68,11 +127,6 @@ async def start_handler(message: Message):
         parse_mode="HTML",
         reply_markup=await get_main_keyboard(pool, user['id'])
     )
-
-
-@dp.message(CommandStart(deep_link=True))
-async def start_with_ref(message: Message):
-    await start_handler(message)
 
 
 async def setup_bot_ui():
