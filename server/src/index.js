@@ -96,15 +96,27 @@ app.use((err, req, res, next) => {
   });
 });
 
-prisma.$connect()
-  .then(() => {
-    console.log('📦 Connected to Database via Prisma');
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Database connection error:', error);
-    process.exit(1);
-  });
+const connectWithRetry = async (retries = 5, delay = 5000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await prisma.$connect();
+      console.log('📦 Connected to Database via Prisma');
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+      });
+      return;
+    } catch (error) {
+      console.error(`Database connection error (attempt ${i + 1}/${retries}):`, error.message);
+      if (i < retries - 1) {
+        console.log(`Retrying database connection in ${delay / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        console.error('Max database connection retries reached. Exiting...');
+        process.exit(1);
+      }
+    }
+  }
+};
+
+connectWithRetry();
 export default app;
